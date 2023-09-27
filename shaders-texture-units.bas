@@ -10,7 +10,7 @@ sub initGL( w as long, h as long )
   glViewport( 0, 0, w, h )
 end sub
 
-windowTitle( "learnopengl.com - Textures" )
+windowTitle( "learnopengl.com - Texture units" )
 const as long scrW = 800, scrH = 600
 
 '' Set the OpenGL context
@@ -31,40 +31,47 @@ glBindProc( glVertexAttribPointer )
 glBindProc( glEnableVertexAttribArray )
 
 glBindProc( glUseProgram )
+glBindProc( glActiveTexture )
 
-var img = loadBMP( "res/container.bmp" )
+function createGLTexture( img as Fb.Image ptr ) as GLuint
+  '' Create an OpenGL texture
+  dim as GLuint texture
+  glGenTextures( 1, @texture )
+  
+  '' Bind the newly created texture
+  glBindTexture( GL_TEXTURE_2D, texture )
+  
+  /'
+    These calls set the format of the bitmap that GL uses so we can use the Fb.Image
+    buffers directly and upload them to the shader	
+  '/
+  glPixelStorei( GL_UNPACK_ALIGNMENT, 4 )
+  glPixelStorei( GL_UNPACK_ROW_LENGTH, img->pitch \ sizeof( GLuint ) )
+  
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE )
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE )
+  
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR )
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR )
+  
+  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, img->width, img->height, 0, _
+    GL_BGRA, GL_UNSIGNED_BYTE, cast( GLuint ptr, img ) + sizeof( Fb.Image ) \ sizeof( GLuint ) )
+  
+  '' We're finished so unbind the texture
+  glBindTexture( GL_TEXTURE_2D, 0 )
+  
+  '' Once the texture is uploaded to GPU memory, we can free it
+  imageDestroy( img )
+  
+  return( texture )
+end function
 
-'' Create an OpenGL texture
-dim as GLuint texture
-glGenTextures( 1, @texture )
+'' Load textures
+dim as GLuint texture1 = createGLTexture( loadBMP( "res/container.bmp" ) )
+dim as GLuint texture2 = createGLTexture( loadBMP( "res/awesomeface.bmp" ) )
 
-'' Bind the newly created texture
-glBindTexture( GL_TEXTURE_2D, texture )
-
-/'
-  These calls set the format of the bitmap that GL uses so we can use the Fb.Image
-  buffers directly and upload them to the shader	
-'/
-glPixelStorei( GL_UNPACK_ALIGNMENT, 4 )
-glPixelStorei( GL_UNPACK_ROW_LENGTH, img->pitch \ sizeof( GLuint ) )
-
-glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE )
-glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE )
-
-glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR )
-glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR )
-
-'' Copy the texture to GPU memory
-glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, img->width, img->height, 0, _
-  GL_BGRA, GL_UNSIGNED_BYTE, cast( GLuint ptr, img ) + sizeof( Fb.Image ) \ sizeof( GLuint ) )
-
-'' We're finished so unbind the texture
-glBindTexture( GL_TEXTURE_2D, 0 )
-
-'' Once the texture is uploaded to GPU memory, we can free it
-imageDestroy( img )
-
-var shader = GLShader( "shaders/texture.vs", "shaders/texture.fs" )
+'' Load and compile shader
+var shader = GLShader( "shaders/texture-unit.vs", "shaders/texture-unit.fs" )
 
 dim as GLfloat vertices( ... ) = { _
   _ '' positions        '' colors           '' texture coords
@@ -104,7 +111,7 @@ glBufferData( GL_ELEMENT_ARRAY_BUFFER, ARRAY_ELEMENTS( indices ) * sizeof( GLuin
 glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof( GLfloat ), 0 )
 glEnableVertexAttribArray( 0 )
 
-''' Color
+'' Color
 glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof( GLfloat ), cast( any ptr, ( 3 * sizeof( GLfloat ) ) ) )
 glEnableVertexAttribArray( 1 )
 
@@ -116,6 +123,11 @@ glEnableVertexAttribArray( 2 )
 '' store unwanted attributes in it.
 glBindVertexArray( 0 )
 
+'' Don't forget to activate the shader before setting uniforms 
+glUseProgram( shader )
+  shader.setInt( "texture1", 0 )
+  shader.setInt( "texture2", 1 )
+
 do
   '' Clear the color buffer
   glClearColor( 0.2f, 0.3f, 0.3f, 1.0f )
@@ -124,8 +136,11 @@ do
   '' Bind shader
   glUseProgram( shader )
   
-  '' Bind texture
-  glBindTexture( GL_TEXTURE_2D, texture )
+  '' Bind each texture to a texture unit
+  glActiveTexture( GL_TEXTURE0 )
+  glBindTexture( GL_TEXTURE_2D, texture1 )
+  glActiveTexture( GL_TEXTURE1 )
+  glBindTexture( GL_TEXTURE_2D, texture2 )
   
   '' Bind element array and render it
   glBindVertexArray( VAO )
@@ -140,4 +155,5 @@ loop until( len( inkey() ) )
 '' Cleanup
 glDeleteVertexArrays( 1, @VAO )
 glDeleteBuffers( 1, @VBO )
-glDeleteTextures( 1, @texture )
+glDeleteTextures( 1, @texture1 )
+glDeleteTextures( 1, @texture2 )
