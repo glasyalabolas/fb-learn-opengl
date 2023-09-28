@@ -95,8 +95,6 @@ glUseProgram( shader )
   shader.setInt( "texture1", 0 )
   shader.setInt( "texture2", 1 )
 
-dim as GLfloat angle = 0.0
-
 do
   '' Clear the color buffer
   glClearColor( 0.2f, 0.3f, 0.3f, 1.0f )
@@ -104,7 +102,7 @@ do
   
   '' Compose a transform
   var transform = fbm.translation( 0.5f, -0.5f, 0.0f ) * _
-    fbm.rotation( radians( angle ), Vec4( 0.0f, 0.0f, 1.0f ) )
+    fbm.rotation( timer(), Vec4( 0.0f, 0.0f, 1.0f ) )
   
   '' Bind shader
   glUseProgram( shader )
@@ -129,8 +127,6 @@ do
   flip()
   
   sleep( 1, 1 )
-  
-  angle = ( ( angle + 1 ) + 360 ) mod 360
 loop until( len( inkey() ) )
 
 '' Cleanup

@@ -503,7 +503,7 @@ namespace fbm
       0.0, 0.0, 0.0, 1.0 ) )
   end function
   
-  function projection( fov as single, nearClip as single, farClip as single ) as Mat4
+  function projection overload( fov as single, nearClip as single, farClip as single ) as Mat4
     dim as single _
       fovX = radians( fov ), fovY = radians( fov ), _
       fovTanX = 1 / tan( fovX / 2 ), fovTanY = 1 / tan( fovY / 2 )
@@ -519,6 +519,20 @@ namespace fbm
     end with
     
     return( PM )
+  end function
+  
+  function projection( fov as single, aspect as single, near as single, far as single ) as Mat4
+    dim as single _
+      t = tan( fov / 2 ) * near, _
+      b = -t, _
+      r = t * aspect, _
+      l = -t * aspect
+    
+    return( Mat4( _
+      ( 2 * near ) / ( r - l ), 0, ( r + l ) / ( r - l ), 0, _
+      0, ( 2 * near ) / ( t - b ), ( t + b ) / ( t - b ), 0, _
+      0, 0, -( ( far + near ) / ( far - near ) ), -( ( 2 * far * near ) / ( far - near ) ), _
+      0, 0, -1, 0 ) )
   end function
 end namespace
 
