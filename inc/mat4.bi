@@ -484,18 +484,15 @@ namespace fbm
       0.0, 0.0, 0.0, 1.0 ) 
   end function
   
-  function rotationAboutAxis( rotAxis as Vec4, angle as single ) as Mat4
-    dim as single c = cos( angle )
-    dim as single s = sin( angle )
-    dim as single t = 1 - cos( angle )
+  function rotation( a as single, rotAxis as Vec4 ) as Mat4
+    dim as single c = cos( a ), s = sin( a ), ic = 1.0f - cos( a )
+    dim as Vec4 R = normalize( rotAxis )
     
-    dim as Vec4 axis = normalize( rotAxis )
-    
-    return Mat4( _
-      t * axis.x * axis.x + c, t * axis.x + axis.y + s * axis.z, t * axis.x * axis.z - s * axis.y, 0.0, _
-      t * axis.x * axis.y - s * axis.z, t * axis.y * axis.y + c, t * axis.y * axis.z + s * axis.x, 0.0, _
-      t * axis.x * axis.z + s * axis.y, t * axis.y * axis.z - s * axis.x, t * axis.z * axis.z + c, 0.0, _
-      0.0, 0.0, 0.0, 1.0 )
+    return( Mat4( _
+      c + R.x * R.x * ic,       R.x * R.y * ic - R.z * s, R.x * R.z * ic + R.y * s, 0.0f, _
+      R.y * R.x * ic + R.z * s,       c + R.y * R.y * ic, R.y * R.z * ic - R.x * s, 0.0f, _
+      R.z * R.x * ic - R.y * s, R.z * R.y * ic + R.x * s,       c + R.z * R.z * ic, 0.0f, _
+                          0.0f,                     0.0f,                     0.0f, 1.0f ) ) 
   end function
   
   function scaling( sx as single, sy as single, sz as single ) as Mat4
@@ -504,6 +501,24 @@ namespace fbm
       0.0,  sy, 0.0, 0.0, _
       0.0, 0.0,  sz, 0.0, _
       0.0, 0.0, 0.0, 1.0 ) )
+  end function
+  
+  function projection( fov as single, nearClip as single, farClip as single ) as Mat4
+    dim as single _
+      fovX = radians( fov ), fovY = radians( fov ), _
+      fovTanX = 1 / tan( fovX / 2 ), fovTanY = 1 / tan( fovY / 2 )
+    
+    '' Projection matrix
+    dim as Mat4 PM
+    
+    with PM
+      .a = fovTanX : .b = 0.0 : .c = 0.0 : .d = 0.0
+      .e = 0.0 : .f = fovTanY : .g = 0.0 : .h = 0.0
+      .i = 0.0 : .j = 0.0 : .k = -( ( farClip + nearClip ) / ( farClip - nearClip ) ) : .l = -( ( 2 * ( farClip * nearClip ) ) / ( farClip - nearClip ) )
+      .m = 0.0 : .n = 0.0 : .o = -1.0 : .p = 0.0
+    end with
+    
+    return( PM )
   end function
 end namespace
 

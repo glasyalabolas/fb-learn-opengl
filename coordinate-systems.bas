@@ -12,7 +12,7 @@ sub initGL( w as long, h as long )
   glViewport( 0, 0, w, h )
 end sub
 
-windowTitle( "learnopengl.com - Transforms" )
+windowTitle( "learnopengl.com - Coordinate systems" )
 const as long scrW = 800, scrH = 600
 
 '' Set the OpenGL context
@@ -42,7 +42,7 @@ dim as GLuint texture1 = createGLTexture( loadBMP( "res/container.bmp" ) )
 dim as GLuint texture2 = createGLTexture( loadBMP( "res/awesomeface.bmp" ) )
 
 '' Load and compile shader
-var shader = GLShader( "shaders/transform.vs", "shaders/transform.fs" )
+var shader = GLShader( "shaders/coordinate-systems.vs", "shaders/transform.fs" )
 
 dim as GLfloat vertices( ... ) = { _
   _ '' positions        '' texture coords
@@ -90,21 +90,24 @@ glEnableVertexAttribArray( 1 )
 '' store unwanted attributes in it.
 glBindVertexArray( 0 )
 
-'' Compose a transform
-var transform = fbm.rotation( radians( 90.0f ), vec4( 0.0, 0.0, 1.0, 1.0 ) ) * _
-  fbm.scaling( 0.5, 0.5, 0.5 )
-
 '' Don't forget to activate the shader before setting uniforms 
 glUseProgram( shader )
   shader.setInt( "texture1", 0 )
   shader.setInt( "texture2", 1 )
 
-'' Pass the matrix to the shader through a uniform.
-'' Note that the third parameter is GL_TRUE, which means we're passing the
-'' matrices TRANSPOSED to GL. This is because the memory layout for the types
-'' is different than what GL expects.
-dim as GLuint transformLoc = glGetUniformLocation( shader, "transform" )
-glUniformMatrix4fv( transformLoc, 1, GL_TRUE, @transform.a)
+var model = fbm.rotation( radians( -55.0f ), vec4( 1.0f, 0.0f, 0.0f ) )
+var view_ = fbm.translation( 0.0f, 0.0f, -3.0f )
+var projection = fbm.projection( 45.0f, 0.1f, 100.0f )
+
+'' Remember, we always pass the matrices transposed to GL
+dim as GLint modelLoc = glGetUniformLocation( shader, "model" )
+glUniformMatrix4fv( modelLoc, 1, GL_TRUE, @model.a )
+
+dim as GLint viewLoc = glGetUniformLocation( shader, "view" )
+glUniformMatrix4fv( viewLoc, 1, GL_TRUE, @view_.a )
+
+dim as GLint projectionLoc = glGetUniformLocation( shader, "projection" )
+glUniformMatrix4fv( projectionLoc, 1, GL_TRUE, @projection.a )
 
 do
   '' Clear the color buffer

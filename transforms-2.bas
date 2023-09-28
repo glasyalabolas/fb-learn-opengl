@@ -90,29 +90,30 @@ glEnableVertexAttribArray( 1 )
 '' store unwanted attributes in it.
 glBindVertexArray( 0 )
 
-'' Compose a transform
-var transform = fbm.rotation( radians( 90.0f ), vec4( 0.0, 0.0, 1.0, 1.0 ) ) * _
-  fbm.scaling( 0.5, 0.5, 0.5 )
-
 '' Don't forget to activate the shader before setting uniforms 
 glUseProgram( shader )
   shader.setInt( "texture1", 0 )
   shader.setInt( "texture2", 1 )
 
-'' Pass the matrix to the shader through a uniform.
-'' Note that the third parameter is GL_TRUE, which means we're passing the
-'' matrices TRANSPOSED to GL. This is because the memory layout for the types
-'' is different than what GL expects.
-dim as GLuint transformLoc = glGetUniformLocation( shader, "transform" )
-glUniformMatrix4fv( transformLoc, 1, GL_TRUE, @transform.a)
+dim as GLfloat angle = 0.0
 
 do
   '' Clear the color buffer
   glClearColor( 0.2f, 0.3f, 0.3f, 1.0f )
   glClear( GL_COLOR_BUFFER_BIT )
   
+  '' Compose a transform
+  var transform = fbm.translation( 0.5f, -0.5f, 0.0f ) * _
+    fbm.rotation( radians( angle ), Vec4( 0.0f, 0.0f, 1.0f ) )
+  
   '' Bind shader
   glUseProgram( shader )
+  
+  '' Pass the matrix to the shader through a uniform.
+  '' Note that here we pass the matrix transposed to GL, as the memory
+  '' layout for the FB type is different than what GL expects.
+  dim as GLuint transformLoc = glGetUniformLocation( shader, "transform" )
+  glUniformMatrix4fv( transformLoc, 1, GL_TRUE, @transform.a)
   
   '' Bind each texture to a texture unit
   glActiveTexture( GL_TEXTURE0 )
@@ -128,6 +129,8 @@ do
   flip()
   
   sleep( 1, 1 )
+  
+  angle = ( ( angle + 1 ) + 360 ) mod 360
 loop until( len( inkey() ) )
 
 '' Cleanup
