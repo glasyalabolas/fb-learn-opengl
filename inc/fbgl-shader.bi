@@ -19,11 +19,13 @@ glBindProc( glDetachShader )
 glBindProc( glGetProgramiv )
 glBindProc( glGetProgramInfoLog )
 glBindProc( glDeleteProgram )
+glBindProc( glUseProgram )
 
 glBindProc( glGetUniformLocation )
 glBindProc( glUniform1i )
 glBindProc( glUniform1f )
 glBindProc( glUniform4f )
+glBindProc( glUniformMatrix4fv )
 
 '' Load a vertex shader
 function loadVertexShader( fileName as string ) as GLuint
@@ -170,6 +172,7 @@ type GLShader
     declare sub setInt( name_ as string, value as GLint )
     declare sub setFloat( name_ as string, value as GLfloat )
     declare sub setVec4( name_ as string, x as GLfloat, y as GLfloat, z as GLfloat, w as GLfloat )
+    declare sub setMat4( name_ as string, M as Mat4 )
   
   private:
     as GLuint _shaderID
@@ -251,4 +254,8 @@ end sub
 
 sub GLShader.setVec4( name_ as string, x as GLfloat, y as GLfloat, z as GLfloat, w as GLfloat )
   glUniform4f( glGetUniformLocation( _shaderID, name_ ), x, y, z, w )
+end sub
+
+sub GLShader.setMat4( name_ as string, M as Mat4 )
+  glUniformMatrix4fv( glGetUniformLocation( _shaderID, name_ ), 1, GL_TRUE, @M.a )
 end sub

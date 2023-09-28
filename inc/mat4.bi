@@ -457,8 +457,8 @@ function inverse( M as Mat4 ) as Mat4
 end function
   
 namespace fbm
+  '' Returns an identity matrix
   function identity() as Mat4
-    '' Returns an identity matrix
     return( Mat4( _
       1.0, 0.0, 0.0, 0.0, _
       0.0, 1.0, 0.0, 0.0, _
@@ -484,6 +484,7 @@ namespace fbm
       0.0, 0.0, 0.0, 1.0 ) 
   end function
   
+  '' Returns a rotation matrix
   function rotation( a as single, rotAxis as Vec4 ) as Mat4
     dim as single c = cos( a ), s = sin( a ), ic = 1.0f - cos( a )
     dim as Vec4 R = normalize( rotAxis )
@@ -495,6 +496,7 @@ namespace fbm
                           0.0f,                     0.0f,                     0.0f, 1.0f ) ) 
   end function
   
+  '' Returns a scaling matrix
   function scaling( sx as single, sy as single, sz as single ) as Mat4
     return( Mat4( _
        sx, 0.0, 0.0, 0.0, _
@@ -503,12 +505,12 @@ namespace fbm
       0.0, 0.0, 0.0, 1.0 ) )
   end function
   
+  '' Constructs a projection matrix
   function projection overload( fov as single, nearClip as single, farClip as single ) as Mat4
     dim as single _
       fovX = radians( fov ), fovY = radians( fov ), _
       fovTanX = 1 / tan( fovX / 2 ), fovTanY = 1 / tan( fovY / 2 )
     
-    '' Projection matrix
     dim as Mat4 PM
     
     with PM
@@ -521,6 +523,7 @@ namespace fbm
     return( PM )
   end function
   
+  '' Constructs a projection matrix
   function projection( fov as single, aspect as single, near as single, far as single ) as Mat4
     dim as single _
       t = tan( fov / 2 ) * near, _
