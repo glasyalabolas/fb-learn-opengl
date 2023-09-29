@@ -172,7 +172,7 @@ type GLShader
     declare sub setInt( name_ as string, value as GLint )
     declare sub setFloat( name_ as string, value as GLfloat )
     declare sub setVec4( name_ as string, x as GLfloat, y as GLfloat, z as GLfloat, w as GLfloat )
-    declare sub setMat4( name_ as string, M as Mat4 )
+    declare sub setMat4( name_ as string, M as Mat4, transposed as boolean = true )
   
   private:
     as GLuint _shaderID
@@ -256,6 +256,6 @@ sub GLShader.setVec4( name_ as string, x as GLfloat, y as GLfloat, z as GLfloat,
   glUniform4f( glGetUniformLocation( _shaderID, name_ ), x, y, z, w )
 end sub
 
-sub GLShader.setMat4( name_ as string, M as Mat4 )
-  glUniformMatrix4fv( glGetUniformLocation( _shaderID, name_ ), 1, GL_TRUE, @M.a )
+sub GLShader.setMat4( name_ as string, M as Mat4, transposed as boolean = true )
+  glUniformMatrix4fv( glGetUniformLocation( _shaderID, name_ ), 1, iif( transposed, GL_TRUE, GL_FALSE ), @M.a )
 end sub

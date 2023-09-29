@@ -166,7 +166,7 @@ sub Mat4.inverse()
     
     This version is 60%+ faster and 400%+ uglier than the previous version.
     it was made so by computing the determinant inside the method and
-    recycling as much  calculation as possible
+    recycling as much calculation as possible
   '/
   '' List of 2x2 determinants
   dim as single _
@@ -455,7 +455,7 @@ function inverse( M as Mat4 ) as Mat4
   
   return( I )
 end function
-  
+
 namespace fbm
   '' Returns an identity matrix
   function identity() as Mat4
@@ -532,10 +532,28 @@ namespace fbm
       l = -t * aspect
     
     return( Mat4( _
-      ( 2 * near ) / ( r - l ), 0, ( r + l ) / ( r - l ), 0, _
+      -( ( 2 * near ) / ( r - l ) ), 0, ( r + l ) / ( r - l ), 0, _
       0, ( 2 * near ) / ( t - b ), ( t + b ) / ( t - b ), 0, _
       0, 0, -( ( far + near ) / ( far - near ) ), -( ( 2 * far * near ) / ( far - near ) ), _
       0, 0, -1, 0 ) )
+  end function
+  
+  '' Constructs a lookAt transform matrix using position, target and up vectors
+  function lookAt( p as Vec4, target as Vec4, up as Vec4 ) as Mat4
+    var zaxis = normalize( p - target )
+    var xaxis = normalize( cross( normalize( up ), zaxis ) )
+    var yaxis = cross( zaxis, xaxis )
+    
+    'return( Mat4( _
+    '  xaxis.x, yaxis.x, zaxis.x, 0.0f, _
+    '  xaxis.y, yaxis.y, zaxis.y, 0.0f, _
+    '  xaxis.z, yaxis.z, zaxis.z, 0.0f, _
+    '     0.0f,    0.0f,    0.0f, 1.0f ) * translation( -p.x, -p.y, -p.z ) )
+    return( Mat4( _
+      xaxis.x, xaxis.y, xaxis.z, 0.0f, _
+      yaxis.x, yaxis.y, yaxis.z, 0.0f, _
+      zaxis.x, zaxis.y, zaxis.z, 0.0f, _
+         0.0f,    0.0f,    0.0f, 1.0f ) * translation( -p.x, -p.y, -p.z ) )
   end function
 end namespace
 
