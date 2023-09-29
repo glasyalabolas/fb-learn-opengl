@@ -132,10 +132,6 @@ glUseProgram( shader )
   shader.setInt( "texture1", 0 )
   shader.setInt( "texture2", 1 )
 
-var projection = fbm.projection( 45.0f, scrW / scrH, 0.1f, 100.0f )
-
-shader.setMat4( "projection", projection )
-
 dim as double deltaTime = 0.0, lastFrame = 0.0
 
 '' Camera vectors
@@ -143,12 +139,12 @@ var cameraPos = Vec4( 0.0f, 0.0f, 3.0f )
 var cameraFront = Vec4( 0.0f, 0.0f, -1.0f )
 var cameraUp = Vec4( 0.0f, 1.0f, 0.0f )
 
-'' Mouse position and last positions
-dim as long xpos, ypos
+'' Mouse status and last position
+dim as long xpos, ypos, wheel, lastWheel = 0
 dim as single lastX = scrW / 2, lastY = scrH / 2
 
 '' Euler angles
-dim as single pitch = 0.0f, yaw = -90.0f
+dim as single pitch = 0.0f, yaw = -90.0f, fov = 45.0f
 
 do
   dim as double currentFrame = timer()
@@ -160,6 +156,7 @@ do
   '' Bind shader
   glUseProgram( shader )
   
+  shader.setMat4( "projection", fbm.projection( radians( fov ), scrW / scrH, 0.1f, 100.0f ) )
   shader.setMat4( "view", fbm.lookAt( cameraPos, cameraPos + cameraFront, cameraUp ) )
   
   '' Bind each texture to a texture unit
@@ -202,8 +199,8 @@ do
     cameraPos -= normalize( cross( cameraFront, cameraUp ) ) * cameraSpeed
   end if
   
-  if( getMouse( xpos, ypos ) = 0 ) then
-    dim as single sensitivity = 0.1f
+  if( getMouse( xpos, ypos, wheel ) = 0 ) then
+    dim as single sensitivity = 0.2f
     
     dim as single xoffset = ( xpos - lastX ) * sensitivity
     dim as single yoffset = ( lastY - ypos ) * sensitivity
@@ -216,6 +213,15 @@ do
     
     if( pitch > 89.0f ) then pitch = 89.0f
     if( pitch < -89.0f ) then pitch = -89.0f
+    
+    '' Zoom in/out using the mouse wheel
+    dim as long woffset = wheel - lastWheel
+    lastWheel = wheel
+    
+    fov += woffset
+    
+    if( fov > 45.0f ) then fov = 45.0f
+    if( fov < 1.0f ) then fov = 1.0f
   end if
   
   '' Set up new camera direction based on angles

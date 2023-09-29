@@ -12,7 +12,7 @@
 
 '' Some useful helper functions.
 '' Prints messages to the console for debugging purposes
-sub cPrint( text as string = "" )
+sub debug( text as string = "" )
   dim as integer fn = freeFile()
   
   open cons for output as fn
