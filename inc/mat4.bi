@@ -287,39 +287,6 @@ sub Mat4.inverse()
     -Md * invDet,  Mh * invDet, -Ml * invDet,  Mp * invDet )
 end sub
 
-/'
-sub Mat4.inverse()
-  /'
-    calculates the inverse of a 4x4 matrix
-    
-    the minor, cofactor and adjugate matrices are all calculated and factored into the
-    code to make it shorter and more efficient
-  '/
-  
-  '' multiplying by the reciprocal of the determinant is faster than dividing by it  
-  dim as single invDet = 1 / determinant
-  
-  this = Mat4( _
-    ( f * k * p + g * l * n + h * j * o - f * l * o - g * j * p - h * k * n ) * invDet, _
-    ( b * l * o + c * j * p + d * k * n - b * k * p - c * l * n - d * j * o ) * invDet, _
-    ( b * g * p + c * h * n + d * f * o - b * h * o - c * f * p - d * g * n ) * invDet, _
-    ( b * h * k + c * f * l + d * g * j - b * g * l - c * h * j - d * f * k ) * invDet, _
-    ( e * l * o + g * i * p + h * k * m - e * k * p - g * l * m - h * i * o ) * invDet, _
-    ( a * k * p + c * l * m + d * i * o - a * l * o - c * i * p - d * k * m ) * invDet, _
-    ( a * h * o + c * e * p + d * g * m - a * g * p - c * h * m - d * e * o ) * invDet, _
-    ( a * g * l + c * h * i + d * e * k - a * h * k - c * e * l - d * g * i ) * invDet, _
-    ( e * j * p + f * l * m + h * i * n - e * l * n - f * i * p - h * j * m ) * invDet, _
-    ( a * l * n + b * i * p + d * j * m - a * j * p - b * l * m - d * i * n ) * invDet, _
-    ( a * f * p + b * h * m + d * e * n - a * h * n - b * e * p - d * f * m ) * invDet, _
-    ( a * h * j + b * e * l + d * f * i - a * f * l - b * h * i - d * e * j ) * invDet, _
-    ( e * k * n + f * i * o + g * j * m - e * j * o - f * k * m - g * i * n ) * invDet, _
-    ( a * j * o + b * k * m + c * i * n - a * k * n - b * i * o - c * j * m ) * invDet, _
-    ( a * g * n + b * e * o + c * f * m - a * f * o - b * g * m - c * e * n ) * invDet, _
-    ( a * f * k + b * g * i + c * e * j - a * g * j - b * e * k - c * f * i ) * invDet _
-  )
-  '' lovely, isn't it?
-end sub
-'/
 sub Mat4.identity()
   '' Makes the matrix an identity matrix
   a = 1.0 : b = 0.0 : c = 0.0 : d = 0.0
@@ -526,15 +493,18 @@ namespace fbm
   '' Constructs a projection matrix
   function projection( fov as single, aspect as single, near as single, far as single ) as Mat4
     dim as single _
-      t = tan( fov / 2 ) * near, _
-      b = -t, _
-      r = t * aspect, _
-      l = -t * aspect
+      tangent = tan( radians( fov ) / 2 ), _
+      halfHeight = near * tangent, _
+      halfWidth = halfHeight * aspect, _
+      l =  halfWidth, _
+      r = -halfWidth, _
+      t =  halfHeight, _
+      b = -halfHeight
     
     return( Mat4( _
-      -( ( 2 * near ) / ( r - l ) ), 0, ( r + l ) / ( r - l ), 0, _
+      ( 2 * near ) / ( r - l ), 0, ( r + l ) / ( r - l ), 0, _
       0, ( 2 * near ) / ( t - b ), ( t + b ) / ( t - b ), 0, _
-      0, 0, -( ( far + near ) / ( far - near ) ), -( ( 2 * far * near ) / ( far - near ) ), _
+      0, 0, -( far + near ) / ( far - near ), ( -2 * far * near ) / ( far - near ), _
       0, 0, -1, 0 ) )
   end function
   

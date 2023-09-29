@@ -145,8 +145,8 @@ do
   glUseProgram( shader )
   
   dim as single radius = 10.0f
-  dim as single camX = sin( timer() * 0.1 ) * radius
-  dim as single camZ = cos( timer() * 0.1 ) * radius
+  dim as single camX = sin( timer() ) * radius
+  dim as single camZ = cos( timer() ) * radius
   
   shader.setMat4( "view", fbm.lookAt( _
     Vec4( camX, 0.0f, camZ ), Vec4( 0.0f, 0.0f, 0.0f ), Vec4( 0.0f, 1.0f, 0.0f ) ) )

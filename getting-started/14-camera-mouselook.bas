@@ -156,7 +156,7 @@ do
   '' Bind shader
   glUseProgram( shader )
   
-  shader.setMat4( "projection", fbm.projection( radians( fov ), scrW / scrH, 0.1f, 100.0f ) )
+  shader.setMat4( "projection", fbm.projection( fov, scrW / scrH, 0.1f, 100.0f ) )
   shader.setMat4( "view", fbm.lookAt( cameraPos, cameraPos + cameraFront, cameraUp ) )
   
   '' Bind each texture to a texture unit
