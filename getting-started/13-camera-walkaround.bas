@@ -1,8 +1,8 @@
 #include once "GL/gl.bi"
 #include once "GL/glext.bi"
-#include once "inc/fbgl-img.bi"
-#include once "inc/vec4.bi"
-#include once "inc/mat4.bi"
+#include once "../inc/fbgl-img.bi"
+#include once "../inc/vec4.bi"
+#include once "../inc/mat4.bi"
 
 #define ARRAY_ELEMENTS( a ) ( ubound( a ) + 1 )
 
@@ -13,14 +13,14 @@ sub initGL( w as long, h as long )
   glEnable( GL_DEPTH_TEST )
 end sub
 
-windowTitle( "learnopengl.com - Coordinate systems" )
+windowTitle( "learnopengl.com - Camera - Walk around" )
 const as long scrW = 800, scrH = 600
 
 '' Set the OpenGL context
 InitGL( scrW, scrH )
 
 '' Bind extensions used for the example
-#include once "inc/fbgl-shader.bi"
+#include once "../inc/fbgl-shader.bi"
 
 glBindProc( glGenBuffers )
 glBindProc( glBindBuffer )
@@ -35,10 +35,10 @@ glBindProc( glEnableVertexAttribArray )
 
 glBindProc( glActiveTexture )
 
-#include once "inc/fbgl-texture.bi"
+#include once "../inc/fbgl-texture.bi"
 
-dim as GLuint texture1 = createGLTexture( loadBMP( "res/container.bmp" ) )
-dim as GLuint texture2 = createGLTexture( loadBMP( "res/awesomeface.bmp" ) )
+dim as GLuint texture1 = createGLTexture( loadBMP( "../res/container.bmp" ) )
+dim as GLuint texture2 = createGLTexture( loadBMP( "../res/awesomeface.bmp" ) )
 
 dim as GLfloat vertices( ... ) = { _
   -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, _
@@ -132,19 +132,26 @@ glUseProgram( shader )
   shader.setInt( "texture1", 0 )
   shader.setInt( "texture2", 1 )
 
-var view_ = fbm.translation( 0.0f, 0.0f, -3.0f )
-var projection = fbm.projection( 45.0f, scrW / scrH, 0.1f, 100.0f )
+  shader.setMat4( "projection", fbm.projection( 45.0f, scrW / scrH, 0.1f, 100.0f ) )
 
-shader.setMat4( "view", view_ )
-shader.setMat4( "projection", projection )
+dim as double deltaTime = 0.0, lastFrame = 0.0
+
+'' Camera vectors
+var cameraPos = Vec4( 0.0f, 0.0f, 3.0f )
+var cameraFront = Vec4( 0.0f, 0.0f, -1.0f )
+var cameraUp = Vec4( 0.0f, 1.0f, 0.0f )
 
 do
+  dim as double currentFrame = timer()
+  
   '' Clear the color buffer
   glClearColor( 0.2f, 0.3f, 0.3f, 1.0f )
   glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT )
   
   '' Bind shader
   glUseProgram( shader )
+  
+  shader.setMat4( "view", fbm.lookAt( cameraPos, cameraPos + cameraFront, cameraUp ) )
   
   '' Bind each texture to a texture unit
   glActiveTexture( GL_TEXTURE0 )
@@ -165,8 +172,29 @@ do
   
   flip()
   
+  deltaTime = currentFrame - lastFrame
+  lastFrame = currentFrame
+  
+  dim as single cameraSpeed = 2.5f * deltaTime
+  
+  if( multiKey( Fb.SC_W ) ) then
+    cameraPos += cameraSpeed * cameraFront
+  end if
+  
+  if( multiKey( Fb.SC_S ) ) then
+    cameraPos -= cameraSpeed * cameraFront
+  end if
+  
+  if( multiKey( Fb.SC_A ) ) then
+    cameraPos += normalize( cross( cameraFront, cameraUp ) ) * cameraSpeed
+  end if
+  
+  if( multiKey( Fb.SC_D ) ) then
+    cameraPos -= normalize( cross( cameraFront, cameraUp ) ) * cameraSpeed
+  end if
+  
   sleep( 1, 1 )
-loop until( len( inkey() ) )
+loop until( multiKey( Fb.SC_ESCAPE ) )
 
 '' Cleanup
 glDeleteVertexArrays( 1, @VAO )

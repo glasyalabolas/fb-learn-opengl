@@ -10,14 +10,14 @@ sub initGL( w as long, h as long )
   glViewport( 0, 0, w, h )
 end sub
 
-windowTitle( "learnopengl.com - Uniforms" )
+windowTitle( "learnopengl.com - Vertex attributes" )
 const as long scrW = 800, scrH = 600
 
 '' Set the OpenGL context
 InitGL( scrW, scrH )
 
 '' Bind extensions used for the example
-#include once "inc/fbgl-shader.bi"
+#include once "../inc/fbgl-shader.bi"
 
 glBindProc( glGenBuffers )
 glBindProc( glBindBuffer )
@@ -31,14 +31,14 @@ glBindProc( glVertexAttribPointer )
 glBindProc( glEnableVertexAttribArray )
 
 glBindProc( glUseProgram )
-glBindProc( glUniform4f )
 
-var shader = GLShader( "shaders/hello-triangle.vs", "shaders/hello-triangle-uniforms.fs" )
+var shader = GLShader( "shaders/vertex-attributes.vs", "shaders/vertex-attributes.fs" )
 
 dim as GLfloat vertices( ... ) = { _
-   0.0f,  0.5f, 0.0f, _
-  -0.5f, -0.5f, 0.0f, _
-   0.5f, -0.5f, 0.0f }
+  _ '' positions       '' colors
+   0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, _  '' bottom right
+  -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f, _  '' bottom left
+   0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f }   '' top
 
 '' Vertex array object
 dim as GLuint VAO
@@ -56,8 +56,12 @@ glBindVertexArray( VAO )
 glBindBuffer( GL_ARRAY_BUFFER, VBO )
 glBufferData( GL_ARRAY_BUFFER, ARRAY_ELEMENTS( vertices ) * sizeof( GLfloat ), @vertices( 0 ), GL_STATIC_DRAW )
 
-glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof( GLfloat ), 0 )
+'' Position attribute
+glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof( GLfloat ), 0 )
 glEnableVertexAttribArray( 0 )
+'' Color attribute
+glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof( GLfloat ), cast( any ptr, ( 3 * sizeof( GLfloat ) ) ) )
+glEnableVertexAttribArray( 1 )
 
 '' Unbind the vertex array once we finish setting attributes, to avoid accidentally
 '' store unwanted attributes in it.
@@ -70,13 +74,6 @@ do
   
   '' Bind shader
   glUseProgram( shader )
-  
-  '' Set the green component of the triangle depending on a variable
-  dim as GLfloat timeValue_ = timer()
-  dim as GLfloat greenValue = sin( timeValue_ ) / 2.0f + 0.5f
-  
-  dim as GLint vertexColorLocation = glGetUniformLocation( shader, "ourColor" )
-  glUniform4f( vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f )
   
   '' Bind vertex array and render it
   glBindVertexArray( VAO )

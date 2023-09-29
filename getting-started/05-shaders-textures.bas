@@ -1,6 +1,6 @@
 #include once "GL/gl.bi"
 #include once "GL/glext.bi"
-#include once "fbgfx.bi"
+#include once "../inc/fbgl-img.bi"
 
 #define ARRAY_ELEMENTS( a ) ( ubound( a ) + 1 )
 
@@ -10,14 +10,14 @@ sub initGL( w as long, h as long )
   glViewport( 0, 0, w, h )
 end sub
 
-windowTitle( "learnopengl.com - Hello quad" )
+windowTitle( "learnopengl.com - Textures" )
 const as long scrW = 800, scrH = 600
 
 '' Set the OpenGL context
 InitGL( scrW, scrH )
 
 '' Bind extensions used for the example
-#include once "inc/fbgl-shader.bi"
+#include once "../inc/fbgl-shader.bi"
 
 glBindProc( glGenBuffers )
 glBindProc( glBindBuffer )
@@ -32,13 +32,46 @@ glBindProc( glEnableVertexAttribArray )
 
 glBindProc( glUseProgram )
 
-var shader = GLShader( "shaders/hello-triangle.vs", "shaders/hello-triangle.fs" )
+var img = loadBMP( "../res/container.bmp" )
+
+'' Create an OpenGL texture
+dim as GLuint texture
+glGenTextures( 1, @texture )
+
+'' Bind the newly created texture
+glBindTexture( GL_TEXTURE_2D, texture )
+
+/'
+  These calls set the format of the bitmap that GL uses so we can use the Fb.Image
+  buffers directly and upload them to the shader	
+'/
+glPixelStorei( GL_UNPACK_ALIGNMENT, 4 )
+glPixelStorei( GL_UNPACK_ROW_LENGTH, img->pitch \ sizeof( GLuint ) )
+
+glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE )
+glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE )
+
+glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR )
+glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR )
+
+'' Copy the texture to GPU memory
+glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, img->width, img->height, 0, _
+  GL_BGRA, GL_UNSIGNED_BYTE, cast( GLuint ptr, img ) + sizeof( Fb.Image ) \ sizeof( GLuint ) )
+
+'' We're finished so unbind the texture
+glBindTexture( GL_TEXTURE_2D, 0 )
+
+'' Once the texture is uploaded to GPU memory, we can free it
+imageDestroy( img )
+
+var shader = GLShader( "shaders/texture.vs", "shaders/texture.fs" )
 
 dim as GLfloat vertices( ... ) = { _
-   0.5f,  0.5f, 0.0f, _  '' top right
-   0.5f, -0.5f, 0.0f, _  '' bottom right
-  -0.5f, -0.5f, 0.0f, _  '' bottom left
-  -0.5f,  0.5f, 0.0f }   '' top left 
+  _ '' positions        '' colors           '' texture coords
+   0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, _  '' top right
+   0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, _  '' bottom right
+  -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, _  '' bottom left
+  -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f }   '' top left
 
 dim as GLuint indices( ... ) = { _
   0, 1, 3, _   '' first triangle
@@ -67,8 +100,17 @@ glBufferData( GL_ARRAY_BUFFER, ARRAY_ELEMENTS( vertices ) * sizeof( GLfloat ), @
 glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, EBO )
 glBufferData( GL_ELEMENT_ARRAY_BUFFER, ARRAY_ELEMENTS( indices ) * sizeof( GLuint ), @indices( 0 ), GL_STATIC_DRAW )
 
-glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof( GLfloat ), 0 )
+'' Position
+glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof( GLfloat ), 0 )
 glEnableVertexAttribArray( 0 )
+
+''' Color
+glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof( GLfloat ), cast( any ptr, ( 3 * sizeof( GLfloat ) ) ) )
+glEnableVertexAttribArray( 1 )
+
+'' Texture coordinates
+glVertexAttribPointer( 2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof( GLfloat ), cast( any ptr, ( 6 * sizeof( GLfloat ) ) ) )
+glEnableVertexAttribArray( 2 )
 
 '' Unbind the vertex array once we finish setting attributes, to avoid accidentally
 '' store unwanted attributes in it.
@@ -81,6 +123,9 @@ do
   
   '' Bind shader
   glUseProgram( shader )
+  
+  '' Bind texture
+  glBindTexture( GL_TEXTURE_2D, texture )
   
   '' Bind element array and render it
   glBindVertexArray( VAO )
@@ -95,3 +140,4 @@ loop until( len( inkey() ) )
 '' Cleanup
 glDeleteVertexArrays( 1, @VAO )
 glDeleteBuffers( 1, @VBO )
+glDeleteTextures( 1, @texture )

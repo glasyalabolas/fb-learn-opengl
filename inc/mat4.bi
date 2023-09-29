@@ -457,7 +457,7 @@ function inverse( M as Mat4 ) as Mat4
 end function
 
 namespace fbm
-  '' Returns an identity matrix
+  '' Constructs an identity matrix
   function identity() as Mat4
     return( Mat4( _
       1.0, 0.0, 0.0, 0.0, _
@@ -466,7 +466,7 @@ namespace fbm
       0.0, 0.0, 0.0, 1.0 ) )
   end function
   
-  '' Returns a translation matrix
+  '' Constructs a translation matrix
   function translation overload( t as Vec4 ) as Mat4
     return Mat4( _
       1.0, 0.0, 0.0, t.x, _
@@ -475,7 +475,7 @@ namespace fbm
       0.0, 0.0, 0.0, 1.0 ) 
   end function
   
-  '' Returns a translation matrix
+  '' Constructs a translation matrix
   function translation( tx as single, ty as single, tz as single ) as Mat4
     return Mat4( _
       1.0, 0.0, 0.0, tx, _
@@ -484,8 +484,8 @@ namespace fbm
       0.0, 0.0, 0.0, 1.0 ) 
   end function
   
-  '' Returns a rotation matrix
-  function rotation( a as single, rotAxis as Vec4 ) as Mat4
+  '' Constructs a rotation matrix
+  function rotation( a as double, rotAxis as Vec4 ) as Mat4
     dim as single c = cos( a ), s = sin( a ), ic = 1.0f - cos( a )
     dim as Vec4 R = normalize( rotAxis )
     
@@ -496,7 +496,7 @@ namespace fbm
                           0.0f,                     0.0f,                     0.0f, 1.0f ) ) 
   end function
   
-  '' Returns a scaling matrix
+  '' Constructs a scaling matrix
   function scaling( sx as single, sy as single, sz as single ) as Mat4
     return( Mat4( _
        sx, 0.0, 0.0, 0.0, _
@@ -544,11 +544,6 @@ namespace fbm
     var xaxis = normalize( cross( normalize( up ), zaxis ) )
     var yaxis = cross( zaxis, xaxis )
     
-    'return( Mat4( _
-    '  xaxis.x, yaxis.x, zaxis.x, 0.0f, _
-    '  xaxis.y, yaxis.y, zaxis.y, 0.0f, _
-    '  xaxis.z, yaxis.z, zaxis.z, 0.0f, _
-    '     0.0f,    0.0f,    0.0f, 1.0f ) * translation( -p.x, -p.y, -p.z ) )
     return( Mat4( _
       xaxis.x, xaxis.y, xaxis.z, 0.0f, _
       yaxis.x, yaxis.y, yaxis.z, 0.0f, _

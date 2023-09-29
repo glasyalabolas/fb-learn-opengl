@@ -1,8 +1,8 @@
 #include once "GL/gl.bi"
 #include once "GL/glext.bi"
-#include once "inc/fbgl-img.bi"
-#include once "inc/vec4.bi"
-#include once "inc/mat4.bi"
+#include once "../inc/fbgl-img.bi"
+#include once "../inc/vec4.bi"
+#include once "../inc/mat4.bi"
 
 #define ARRAY_ELEMENTS( a ) ( ubound( a ) + 1 )
 
@@ -12,14 +12,14 @@ sub initGL( w as long, h as long )
   glViewport( 0, 0, w, h )
 end sub
 
-windowTitle( "learnopengl.com - Transforms" )
+windowTitle( "learnopengl.com - Transformations" )
 const as long scrW = 800, scrH = 600
 
 '' Set the OpenGL context
 InitGL( scrW, scrH )
 
 '' Bind extensions used for the example
-#include once "inc/fbgl-shader.bi"
+#include once "../inc/fbgl-shader.bi"
 
 glBindProc( glGenBuffers )
 glBindProc( glBindBuffer )
@@ -36,10 +36,10 @@ glBindProc( glUseProgram )
 glBindProc( glActiveTexture )
 glBindProc( glUniformMatrix4fv )
 
-#include once "inc/fbgl-texture.bi"
+#include once "../inc/fbgl-texture.bi"
 
-dim as GLuint texture1 = createGLTexture( loadBMP( "res/container.bmp" ) )
-dim as GLuint texture2 = createGLTexture( loadBMP( "res/awesomeface.bmp" ) )
+dim as GLuint texture1 = createGLTexture( loadBMP( "../res/container.bmp" ) )
+dim as GLuint texture2 = createGLTexture( loadBMP( "../res/awesomeface.bmp" ) )
 
 '' Load and compile shader
 var shader = GLShader( "shaders/transform.vs", "shaders/transform.fs" )
@@ -90,28 +90,29 @@ glEnableVertexAttribArray( 1 )
 '' store unwanted attributes in it.
 glBindVertexArray( 0 )
 
+'' Compose a transform
+var transform = fbm.rotation( radians( 90.0f ), vec4( 0.0, 0.0, 1.0, 1.0 ) ) * _
+  fbm.scaling( 0.5, 0.5, 0.5 )
+
 '' Don't forget to activate the shader before setting uniforms 
 glUseProgram( shader )
   shader.setInt( "texture1", 0 )
   shader.setInt( "texture2", 1 )
+
+'' Pass the matrix to the shader through a uniform.
+'' Note that the third parameter is GL_TRUE, which means we're passing the
+'' matrices TRANSPOSED to GL. This is because the memory layout for the types
+'' is different than what GL expects.
+dim as GLuint transformLoc = glGetUniformLocation( shader, "transform" )
+glUniformMatrix4fv( transformLoc, 1, GL_TRUE, @transform.a)
 
 do
   '' Clear the color buffer
   glClearColor( 0.2f, 0.3f, 0.3f, 1.0f )
   glClear( GL_COLOR_BUFFER_BIT )
   
-  '' Compose a transform
-  var transform = fbm.translation( 0.5f, -0.5f, 0.0f ) * _
-    fbm.rotation( timer(), Vec4( 0.0f, 0.0f, 1.0f ) )
-  
   '' Bind shader
   glUseProgram( shader )
-  
-  '' Pass the matrix to the shader through a uniform.
-  '' Note that here we pass the matrix transposed to GL, as the memory
-  '' layout for the FB type is different than what GL expects.
-  dim as GLuint transformLoc = glGetUniformLocation( shader, "transform" )
-  glUniformMatrix4fv( transformLoc, 1, GL_TRUE, @transform.a)
   
   '' Bind each texture to a texture unit
   glActiveTexture( GL_TEXTURE0 )

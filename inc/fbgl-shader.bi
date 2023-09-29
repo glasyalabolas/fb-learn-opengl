@@ -1,6 +1,7 @@
 #include once "GL/gl.bi"
 #include once "GL/glext.bi"
 #include once "fbglext.bi"
+#include once "../inc/mat4.bi"
 
 /'
   This header contains helper functions to do shader loading/compiling

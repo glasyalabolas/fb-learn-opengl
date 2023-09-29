@@ -17,7 +17,7 @@ const as long scrW = 800, scrH = 600
 InitGL( scrW, scrH )
 
 '' Bind extensions used for the example
-#include once "inc/fbgl-shader.bi"
+#include once "../inc/fbgl-shader.bi"
 
 glBindProc( glGenBuffers )
 glBindProc( glBindBuffer )

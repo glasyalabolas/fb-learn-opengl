@@ -1,8 +1,8 @@
 #include once "GL/gl.bi"
 #include once "GL/glext.bi"
-#include once "inc/fbgl-img.bi"
-#include once "inc/vec4.bi"
-#include once "inc/mat4.bi"
+#include once "../inc/fbgl-img.bi"
+#include once "../inc/vec4.bi"
+#include once "../inc/mat4.bi"
 
 #define ARRAY_ELEMENTS( a ) ( ubound( a ) + 1 )
 
@@ -13,14 +13,14 @@ sub initGL( w as long, h as long )
   glEnable( GL_DEPTH_TEST )
 end sub
 
-windowTitle( "learnopengl.com - Camera" )
+windowTitle( "learnopengl.com - Coordinate systems - More cubes!" )
 const as long scrW = 800, scrH = 600
 
 '' Set the OpenGL context
 InitGL( scrW, scrH )
 
 '' Bind extensions used for the example
-#include once "inc/fbgl-shader.bi"
+#include once "../inc/fbgl-shader.bi"
 
 glBindProc( glGenBuffers )
 glBindProc( glBindBuffer )
@@ -35,10 +35,10 @@ glBindProc( glEnableVertexAttribArray )
 
 glBindProc( glActiveTexture )
 
-#include once "inc/fbgl-texture.bi"
+#include once "../inc/fbgl-texture.bi"
 
-dim as GLuint texture1 = createGLTexture( loadBMP( "res/container.bmp" ) )
-dim as GLuint texture2 = createGLTexture( loadBMP( "res/awesomeface.bmp" ) )
+dim as GLuint texture1 = createGLTexture( loadBMP( "../res/container.bmp" ) )
+dim as GLuint texture2 = createGLTexture( loadBMP( "../res/awesomeface.bmp" ) )
 
 dim as GLfloat vertices( ... ) = { _
   -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, _
@@ -132,8 +132,10 @@ glUseProgram( shader )
   shader.setInt( "texture1", 0 )
   shader.setInt( "texture2", 1 )
 
+var view_ = fbm.translation( 0.0f, 0.0f, -3.0f )
 var projection = fbm.projection( 45.0f, scrW / scrH, 0.1f, 100.0f )
 
+shader.setMat4( "view", view_ )
 shader.setMat4( "projection", projection )
 
 do
@@ -143,13 +145,6 @@ do
   
   '' Bind shader
   glUseProgram( shader )
-  
-  dim as single radius = 10.0f
-  dim as single camX = sin( timer() ) * radius
-  dim as single camZ = cos( timer() ) * radius
-  
-  shader.setMat4( "view", fbm.lookAt( _
-    Vec4( camX, 0.0f, camZ ), Vec4( 0.0f, 0.0f, 0.0f ), Vec4( 0.0f, 1.0f, 0.0f ) ) )
   
   '' Bind each texture to a texture unit
   glActiveTexture( GL_TEXTURE0 )

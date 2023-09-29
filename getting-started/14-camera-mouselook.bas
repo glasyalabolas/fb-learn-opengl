@@ -1,8 +1,8 @@
 #include once "GL/gl.bi"
 #include once "GL/glext.bi"
-#include once "inc/fbgl-img.bi"
-#include once "inc/vec4.bi"
-#include once "inc/mat4.bi"
+#include once "../inc/fbgl-img.bi"
+#include once "../inc/vec4.bi"
+#include once "../inc/mat4.bi"
 
 #define ARRAY_ELEMENTS( a ) ( ubound( a ) + 1 )
 
@@ -13,14 +13,14 @@ sub initGL( w as long, h as long )
   glEnable( GL_DEPTH_TEST )
 end sub
 
-windowTitle( "learnopengl.com - Coordinate systems" )
+windowTitle( "learnopengl.com - Camera - Walk around" )
 const as long scrW = 800, scrH = 600
 
 '' Set the OpenGL context
 InitGL( scrW, scrH )
 
 '' Bind extensions used for the example
-#include once "inc/fbgl-shader.bi"
+#include once "../inc/fbgl-shader.bi"
 
 glBindProc( glGenBuffers )
 glBindProc( glBindBuffer )
@@ -33,14 +33,12 @@ glBindProc( glDeleteVertexArrays )
 glBindProc( glVertexAttribPointer )
 glBindProc( glEnableVertexAttribArray )
 
-glBindProc( glUseProgram )
 glBindProc( glActiveTexture )
-glBindProc( glUniformMatrix4fv )
 
-#include once "inc/fbgl-texture.bi"
+#include once "../inc/fbgl-texture.bi"
 
-dim as GLuint texture1 = createGLTexture( loadBMP( "res/container.bmp" ) )
-dim as GLuint texture2 = createGLTexture( loadBMP( "res/awesomeface.bmp" ) )
+dim as GLuint texture1 = createGLTexture( loadBMP( "../res/container.bmp" ) )
+dim as GLuint texture2 = createGLTexture( loadBMP( "../res/awesomeface.bmp" ) )
 
 dim as GLfloat vertices( ... ) = { _
   -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, _
@@ -86,6 +84,18 @@ dim as GLfloat vertices( ... ) = { _
   -0.5f,  0.5f, -0.5f,  0.0f, 1.0f _
 }
 
+dim as Vec4 cubePositions( ... ) = { _
+  Vec4(  0.0f,  0.0f,  0.0f ), _
+  Vec4(  2.0f,  5.0f, -15.0f ), _
+  Vec4( -1.5f, -2.2f, -2.5f ), _
+  Vec4( -3.8f, -2.0f, -12.3f ), _
+  Vec4(  2.4f, -0.4f, -3.5f ), _
+  Vec4( -1.7f,  3.0f, -7.5f ), _
+  Vec4(  1.3f, -2.0f, -2.5f ), _
+  Vec4(  1.5f,  2.0f, -2.5f ), _
+  Vec4(  1.5f,  0.2f, -1.5f ), _
+  Vec4( -1.3f,  1.0f, -1.5f ) }
+
 '' Vertex array object
 dim as GLuint VAO
 glGenVertexArrays( 1, @VAO )
@@ -122,29 +132,32 @@ glUseProgram( shader )
   shader.setInt( "texture1", 0 )
   shader.setInt( "texture2", 1 )
 
-var model = fbm.rotation( radians( -55.0f ), vec4( 1.0f, 0.0f, 0.0f ) )
-var view_ = fbm.translation( 0.0f, 0.0f, -3.0f )
-var projection = fbm.projection( 45.0f, scrW / scrH, 0.1f, 100.0f )
+dim as double deltaTime = 0.0, lastFrame = 0.0
 
-'' Remember, we always pass the matrices transposed to GL
-dim as GLint viewLoc = glGetUniformLocation( shader, "view" )
-glUniformMatrix4fv( viewLoc, 1, GL_TRUE, @view_.a )
+'' Camera vectors
+var cameraPos = Vec4( 0.0f, 0.0f, 3.0f )
+var cameraFront = Vec4( 0.0f, 0.0f, -1.0f )
+var cameraUp = Vec4( 0.0f, 1.0f, 0.0f )
 
-dim as GLint projectionLoc = glGetUniformLocation( shader, "projection" )
-glUniformMatrix4fv( projectionLoc, 1, GL_TRUE, @projection.a )
+'' Mouse status and last position
+dim as long xpos, ypos, wheel, lastWheel = 0
+dim as single lastX = scrW / 2, lastY = scrH / 2
+
+'' Euler angles
+dim as single pitch = 0.0f, yaw = -90.0f, fov = 45.0f
 
 do
+  dim as double currentFrame = timer()
+  
   '' Clear the color buffer
   glClearColor( 0.2f, 0.3f, 0.3f, 1.0f )
   glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT )
   
-  model = fbm.rotation( timer() * radians( 50.0f ), Vec4( 0.5f, 1.0f, 0.0f ) )
-  
-  dim as GLint modelLoc = glGetUniformLocation( shader, "model" )
-  glUniformMatrix4fv( modelLoc, 1, GL_TRUE, @model.a )
-  
   '' Bind shader
   glUseProgram( shader )
+  
+  shader.setMat4( "projection", fbm.projection( radians( fov ), scrW / scrH, 0.1f, 100.0f ) )
+  shader.setMat4( "view", fbm.lookAt( cameraPos, cameraPos + cameraFront, cameraUp ) )
   
   '' Bind each texture to a texture unit
   glActiveTexture( GL_TEXTURE0 )
@@ -154,13 +167,73 @@ do
   
   '' Bind vertex array and render it
   glBindVertexArray( VAO )
-    glDrawArrays( GL_TRIANGLES, 0, 36 )
+    for i as integer = 0 to ubound( cubePositions )
+      '' Set the transform for the model before rendering it
+      shader.setMat4( "model", fbm.translation( cubePositions( i ) ) * _
+        fbm.rotation( radians( 20.0f * i ), Vec4( 1.0f, 0.3f, 0.5f ) ) )
+      
+      glDrawArrays( GL_TRIANGLES, 0, 36 )
+    next
   glBindVertexArray( 0 )
   
   flip()
   
+  deltaTime = currentFrame - lastFrame
+  lastFrame = currentFrame
+  
+  dim as single cameraSpeed = 2.5f * deltaTime
+  
+  if( multiKey( Fb.SC_W ) ) then
+    cameraPos += cameraSpeed * cameraFront
+  end if
+  
+  if( multiKey( Fb.SC_S ) ) then
+    cameraPos -= cameraSpeed * cameraFront
+  end if
+  
+  if( multiKey( Fb.SC_A ) ) then
+    cameraPos += normalize( cross( cameraFront, cameraUp ) ) * cameraSpeed
+  end if
+  
+  if( multiKey( Fb.SC_D ) ) then
+    cameraPos -= normalize( cross( cameraFront, cameraUp ) ) * cameraSpeed
+  end if
+  
+  if( getMouse( xpos, ypos, wheel ) = 0 ) then
+    dim as single sensitivity = 0.2f
+    
+    dim as single xoffset = ( xpos - lastX ) * sensitivity
+    dim as single yoffset = ( lastY - ypos ) * sensitivity
+    
+    lastX = xpos
+    lastY = ypos
+    
+    yaw += xoffset
+    pitch += yoffset
+    
+    if( pitch > 89.0f ) then pitch = 89.0f
+    if( pitch < -89.0f ) then pitch = -89.0f
+    
+    '' Zoom in/out using the mouse wheel
+    dim as long woffset = wheel - lastWheel
+    lastWheel = wheel
+    
+    fov -= woffset
+    
+    if( fov > 45.0f ) then fov = 45.0f
+    if( fov < 1.0f ) then fov = 1.0f
+  end if
+  
+  '' Set up new camera direction based on angles
+  var direction = Vec4( _
+    cos( radians( yaw ) ) * cos( radians( pitch ) ), _
+    sin( radians( pitch ) ), _
+    sin( radians( yaw ) ) * cos( radians( pitch ) ) )
+  
+  cameraFront = normalize( direction )
+  
   sleep( 1, 1 )
-loop until( len( inkey() ) )
+loop until( multiKey( Fb.SC_ESCAPE ) )
 
 '' Cleanup
 glDeleteVertexArrays( 1, @VAO )
