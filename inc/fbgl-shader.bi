@@ -78,7 +78,7 @@ function loadVertexShader( fileName as string ) as GLuint
     pCode = strPtr( errorLog )  '' Sets the pointer to the string
     
     glGetShaderInfoLog( vertexShaderID, logSize, FBGL_NULL, pCode )
-    errorExit( "glCompileShader(): failed to compile vertex shader. " & !"\n  " & errorLog )
+    errorExit( "glCompileShader(): failed to compile " & fileName & " vertex shader. " & !"\n  " & errorLog )
     
     '' Clean up
     glDeleteShader( vertexShaderID )
@@ -141,7 +141,7 @@ function loadFragmentShader( fileName as string ) as GLuint
     pCode = strPtr( errorLog )
     
     glGetShaderInfoLog( fragmentShaderID, logSize, FBGL_NULL, pCode )
-    errorExit( "glCompileShader(): failed to compile fragment shader. " & !"\n  " & errorLog )
+    errorExit( "glCompileShader(): failed to compile " & fileName & " fragment shader. " & !"\n  " & errorLog )
     
     '' Clean up
     glDeleteShader( fragmentShaderID )
@@ -169,10 +169,12 @@ type GLShader
     
     declare property ID() as GLuint
     
+    declare sub use()
+    
     '' Uniform utility functions
     declare sub setInt( name_ as string, value as GLint )
     declare sub setFloat( name_ as string, value as GLfloat )
-    declare sub setVec4( name_ as string, x as GLfloat, y as GLfloat, z as GLfloat, w as GLfloat )
+    declare sub setVec4( name_ as string, x as GLfloat, y as GLfloat, z as GLfloat, w as GLfloat = 1.0f )
     declare sub setMat4( name_ as string, M as Mat4, transposed as boolean = true )
   
   private:
@@ -253,10 +255,14 @@ sub GLShader.setFloat( name_ as string, value as GLfloat )
   glUniform1f( glGetUniformLocation( _shaderID, name_ ), value )
 end sub
 
-sub GLShader.setVec4( name_ as string, x as GLfloat, y as GLfloat, z as GLfloat, w as GLfloat )
+sub GLShader.setVec4( name_ as string, x as GLfloat, y as GLfloat, z as GLfloat, w as GLfloat = 1.0f )
   glUniform4f( glGetUniformLocation( _shaderID, name_ ), x, y, z, w )
 end sub
 
 sub GLShader.setMat4( name_ as string, M as Mat4, transposed as boolean = true )
   glUniformMatrix4fv( glGetUniformLocation( _shaderID, name_ ), 1, iif( transposed, GL_TRUE, GL_FALSE ), @M.a )
+end sub
+
+sub GLShader.use()
+  glUseProgram( _shaderID )
 end sub

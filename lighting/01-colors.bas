@@ -44,21 +44,15 @@ var texture1 = GLTexture( "../res/container.bmp" )
 var texture2 = GLTexture( "../res/awesomeface.bmp" )
 
 var model = cube()
+var light = lightCube()
 
 dim as Vec4 cubePositions( ... ) = { _
-  Vec4(  0.0f,  0.0f,  0.0f ), _
-  Vec4(  2.0f,  5.0f, -15.0f ), _
-  Vec4( -1.5f, -2.2f, -2.5f ), _
-  Vec4( -3.8f, -2.0f, -12.3f ), _
-  Vec4(  2.4f, -0.4f, -3.5f ), _
-  Vec4( -1.7f,  3.0f, -7.5f ), _
-  Vec4(  1.3f, -2.0f, -2.5f ), _
-  Vec4(  1.5f,  2.0f, -2.5f ), _
-  Vec4(  1.5f,  0.2f, -1.5f ), _
-  Vec4( -1.3f,  1.0f, -1.5f ) }
+  Vec4(  0.0f,  0.0f,  0.0f ) _
+}
 
-'' Load and compile shader
-var shader = GLShader( "shaders/coordinate-systems.vs", "shaders/transform.fs" )
+'' Load and compile shaders
+var shader = GLShader( "shaders/01-colors.vs", "shaders/01-colors.fs" )
+var lightingShader = GLShader( "shaders/01-light-cube.vs", "shaders/01-light-cube.fs" )
 
 '' Don't forget to activate the shader before setting uniforms 
 glUseProgram( shader )
@@ -67,8 +61,9 @@ glUseProgram( shader )
 
 dim as double deltaTime = 0.0, lastFrame = 0.0
 
-'' Camera vectors
+'' Camera
 var cam = Camera( Vec4( 0.0f, 0.0f, 3.0f ) )
+var lightPos = Vec4( 1.2f, 1.0f, 2.0f )
 
 '' Mouse status and last position/wheel
 dim as long xpos, ypos, buttons, wheel, lastWheel = 0
@@ -83,10 +78,12 @@ do
   glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT )
   
   '' Bind shader
-  glUseProgram( shader )
+  shader.use()
   
   shader.setMat4( "projection", fbm.projection( cam.fov, scrW / scrH, cam.near, cam.far ) )
   shader.setMat4( "view", cam.getViewMatrix() )
+  shader.setVec4( "objectColor", 1.0f, 0.5f, 0.31f )
+  shader.setVec4( "lightColor",  1.0f, 1.0f, 1.0f )  
   
   '' Bind each texture to a texture unit
   glActiveTexture( GL_TEXTURE0 )
@@ -103,6 +100,19 @@ do
       
       glDrawArrays( GL_TRIANGLES, 0, 36 )
     next
+  glBindVertexArray( 0 )
+  
+  '' Render light source
+  lightingShader.use()
+  
+  shader.setMat4( "projection", fbm.projection( cam.fov, scrW / scrH, cam.near, cam.far ) )
+  shader.setMat4( "view", cam.getViewMatrix() )
+  
+  glBindVertexArray( light )
+    shader.setMat4( "model", fbm.translation( lightPos ) * _
+      fbm.scaling( 0.2f, 0.2f, 0.2f ) )
+    
+    glDrawArrays( GL_TRIANGLES, 0, 36 )
   glBindVertexArray( 0 )
   
   flip()
@@ -167,3 +177,4 @@ loop until( multiKey( Fb.SC_ESCAPE ) )
 
 '' Cleanup
 model.dispose()
+light.dispose()

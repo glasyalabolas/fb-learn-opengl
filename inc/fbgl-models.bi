@@ -35,7 +35,7 @@ end sub
 
 function cube() as Mesh
   dim as GLfloat vertices( ... ) = { _
-  _ '' positions          texture coords
+  _ '' Positions          Texture coords
     -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, _
      0.5f, -0.5f, -0.5f,  1.0f, 0.0f, _
      0.5f,  0.5f, -0.5f,  1.0f, 1.0f, _
@@ -98,6 +98,69 @@ function cube() as Mesh
   glEnableVertexAttribArray( 1 )
   
   glBindVertexArray( 0 )
+  
+  return( Mesh( VAO, VBO ) )
+end function
+
+function lightCube() as Mesh
+  dim as GLfloat vertices( ... ) = { _
+  _ '' Positions
+    -0.5f, -0.5f, -0.5f, _
+     0.5f, -0.5f, -0.5f, _
+     0.5f,  0.5f, -0.5f, _
+     0.5f,  0.5f, -0.5f, _
+    -0.5f,  0.5f, -0.5f, _
+    -0.5f, -0.5f, -0.5f, _
+    _
+    -0.5f, -0.5f,  0.5f, _
+     0.5f, -0.5f,  0.5f, _
+     0.5f,  0.5f,  0.5f, _
+     0.5f,  0.5f,  0.5f, _
+    -0.5f,  0.5f,  0.5f, _
+    -0.5f, -0.5f,  0.5f, _
+    _
+    -0.5f,  0.5f,  0.5f, _
+    -0.5f,  0.5f, -0.5f, _
+    -0.5f, -0.5f, -0.5f, _
+    -0.5f, -0.5f, -0.5f, _
+    -0.5f, -0.5f,  0.5f, _
+    -0.5f,  0.5f,  0.5f, _
+    _
+     0.5f,  0.5f,  0.5f, _
+     0.5f,  0.5f, -0.5f, _
+     0.5f, -0.5f, -0.5f, _
+     0.5f, -0.5f, -0.5f, _
+     0.5f, -0.5f,  0.5f, _
+     0.5f,  0.5f,  0.5f, _
+    _
+    -0.5f, -0.5f, -0.5f, _
+     0.5f, -0.5f, -0.5f, _
+     0.5f, -0.5f,  0.5f, _
+     0.5f, -0.5f,  0.5f, _
+    -0.5f, -0.5f,  0.5f, _
+    -0.5f, -0.5f, -0.5f, _
+    _
+    -0.5f,  0.5f, -0.5f, _
+     0.5f,  0.5f, -0.5f, _
+     0.5f,  0.5f,  0.5f, _
+     0.5f,  0.5f,  0.5f, _
+    -0.5f,  0.5f,  0.5f, _
+    -0.5f,  0.5f, -0.5f _
+  }
+  
+  dim as GLuint VAO, VBO
+  
+  glGenVertexArrays( 1, @VAO )
+  glGenBuffers( 1, @VBO )
+  
+  glBindVertexArray( VAO )
+  glBindBuffer( GL_ARRAY_BUFFER, VBO )
+  
+  glBufferData( GL_ARRAY_BUFFER, ARRAY_ELEMENTS( vertices ) * sizeof( GLfloat ), @vertices( 0 ), GL_STATIC_DRAW )
+  
+  '' Position
+  glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof( GLfloat ), 0 )
+  glEnableVertexAttribArray( 0 )
   
   return( Mesh( VAO, VBO ) )
 end function
