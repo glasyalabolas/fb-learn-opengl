@@ -12,58 +12,53 @@
 'namespace Math
   '' Some convenience macros
   #ifndef max
-    #define max( a, b )           iif( ( a ) > ( b ), a, b )
+    #define max( a, b )        iif( ( a ) > ( b ), a, b )
   #endif
   
   #ifndef min
-    #define min( a, b )           iif( ( a ) < ( b ), a, b )
+    #define min( a, b )        iif( ( a ) < ( b ), a, b )
   #endif
   
   #ifndef clamp
-    #define clamp( mn, mx, v )    iif( ( v ) < ( mn ), mn, iif( ( v ) > ( mx ), mx, v ) )
+    #define clamp( mn, mx, v ) iif( ( v ) < ( mn ), mn, iif( ( v ) > ( mx ), mx, v ) )
   #endif
   
   #ifndef wrap
-    #define wrap( wrapValue, v )  ( ( v ) + ( wrapValue ) ) mod ( wrapValue )
+    #define wrap( wrapValue, v ) ( ( ( v ) + ( wrapValue ) ) mod ( wrapValue ) )
   #endif
   
   #ifndef fwrap
-    #define fwrap( wrapValue, v ) ( fmod( ( v ) + ( wrapValue ), wrapValue )
+    #define fwrap( wrapValue, v ) ( ( fmod( ( v ) + ( wrapValue ), wrapValue ) )
   #endif
   
   '' portable floating-point mod function
   #ifndef fmod
-    #define fmod( numer, denom )  ( numer ) - int( numer / denom ) * denom
+    #define fmod( numer, denom ) ( ( numer ) - int( numer / denom ) * denom )
   #endif
   
   '' Useful constants
-  const as single pi = 4 * atn( 1 )
-  const as single twoPi = 2 * pi
-  const as single halfPi = pi / 2
+  const as single C_PI = 4 * atn( 1 )
+  const as single C_TWOPI = 2 * C_PI
+  const as single C_HALFPI = C_PI / 2
   
-  const as single degToRad = pi / 180
-  const as single radToDeg = 180 / pi
-  const as single epsilon = 0.00000001
+  const as single C_DEGTORAD = C_PI / 180
+  const as single C_RADTODEG = 180 / C_PI
+  const as single C_EPSILON = 0.00000001
   
   '' Used to express angles in another unit
-  #define radians( ang )  ang * degToRad
-  #define degrees( ang )  ang * radToDeg
+  #define radians( ang ) ( ang * C_DEGTORAD )
+  #define degrees( ang ) ( ang * C_RADTODEG )
   
   '' Functions to return a delimited random value (uses FB implementation which
-  '' is a Mersenne Twister)
-  declare function rndRange overload( byval as integer, byval as integer ) as integer
-  declare function rndRange( byval as single, byval as single ) as single
-  declare function rndRange( byval as double, byval as double ) as double
-  
-  public function rndRange( byval mn as integer, byval mx as integer ) as integer
+  public function rng overload( mn as integer, mx as integer ) as integer
     return int( rnd() * ( mx + 1 - mn ) + mn )
   end function
   
-  public function rndRange( byval mn as single, byval mx as single ) as single
+  public function rng( mn as single, mx as single ) as single
     return rnd() * ( mx - mn ) + mn
   end function
 
-  public function rndRange( byval mn as double, byval mx as double ) as double
+  public function rng( mn as double, mx as double ) as double
     return rnd() * ( mx - mn ) + mn
   end function  
   

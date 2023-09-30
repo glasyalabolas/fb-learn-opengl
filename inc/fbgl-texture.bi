@@ -1,3 +1,5 @@
+#include once "fbgl-img.bi"
+
 function createGLTexture( img as Fb.Image ptr ) as GLuint
   '' Create an OpenGL texture
   dim as GLuint texture
@@ -16,10 +18,8 @@ function createGLTexture( img as Fb.Image ptr ) as GLuint
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE )
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE )
   
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST )
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST )
-  'glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR )
-  'glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR )
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR )
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR )
   
   glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, img->width, img->height, 0, _
     GL_BGRA, GL_UNSIGNED_BYTE, cast( GLuint ptr, img ) + sizeof( Fb.Image ) \ sizeof( GLuint ) )
@@ -32,3 +32,24 @@ function createGLTexture( img as Fb.Image ptr ) as GLuint
   
   return( texture )
 end function
+
+type GLTexture
+  declare constructor( as string )
+  declare destructor()
+  
+  declare operator cast() as GLuint
+  
+  as GLuint ID
+end type
+
+constructor GLTexture( fileName as string )
+  ID = createGLTexture( loadBMP( fileName ) )
+end constructor
+
+destructor GLTexture()
+  glDeleteTextures( 1, @ID )
+end destructor
+
+operator GLTexture.cast() as GLuint
+  return( ID )
+end operator

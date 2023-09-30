@@ -266,38 +266,38 @@ function rotateAroundAxis( v as Vec4, axis as Vec4, angle as single ) as Vec4
     first translate the object to the axis, then use this function, then translate back
     in the new direction.
   '/
-  if( ( v.x = 0 ) and ( v.y = 0 ) and ( v.z = 0 ) ) then
+  if( ( v.x = 0 ) andAlso ( v.y = 0 ) andAlso ( v.z = 0 ) ) then
     return Vec4( 0.0, 0.0, 0.0 )
   end if
   
-  dim nAxis as Vec4 = Vec4( axis.x, axis.y, axis.z ) 'normalize( axis )
+  dim nAxis as Vec4 = Vec4( axis.x, axis.y, axis.z )
   nAxis.normalize()
   
   '' Calculate parameters of the rotation matrix
   dim as single c = cos( angle )
   dim as single s = sin( angle )
-  dim as single t = 1 - c
+  dim as single ic = 1 - c
 
   '' Multiply w with rotation matrix
   dim w as Vec4
   
-  w.x = ( t * nAxis.x * nAxis.x + c ) * v.x _
-      + ( t * nAxis.x * nAxis.y + s * nAxis.z ) * v.y _
-      + ( t * nAxis.x * nAxis.z - s * nAxis.y ) * v.z
+  w.x = ( ic * nAxis.x * nAxis.x + c ) * v.x _
+      + ( ic * nAxis.x * nAxis.y + s * nAxis.z ) * v.y _
+      + ( ic * nAxis.x * nAxis.z - s * nAxis.y ) * v.z
 
-  w.y = ( t * nAxis.x * nAxis.y - s * nAxis.z ) * v.x _
-      + ( t * nAxis.y * nAxis.y + c ) * v.y _
-      + ( t * nAxis.y * nAxis.z + s * nAxis.x ) * v.z
+  w.y = ( ic * nAxis.x * nAxis.y - s * nAxis.z ) * v.x _
+      + ( ic * nAxis.y * nAxis.y + c ) * v.y _
+      + ( ic * nAxis.y * nAxis.z + s * nAxis.x ) * v.z
 
-  w.z = ( t * nAxis.x * nAxis.z + s * nAxis.y ) * v.x _
-      + ( t * nAxis.y * nAxis.z - s * nAxis.x ) * v.y _
-      + ( t * nAxis.z * nAxis.z + c ) * v.z
+  w.z = ( ic * nAxis.x * nAxis.z + s * nAxis.y ) * v.x _
+      + ( ic * nAxis.y * nAxis.z - s * nAxis.x ) * v.y _
+      + ( ic * nAxis.z * nAxis.z + c ) * v.z
   
   '' The vector has to retain its length, so it's normalized and
   '' multiplied with the original length
   w.normalize()
   w = w * v.length()
-
+  
   return( w )
 end function
 

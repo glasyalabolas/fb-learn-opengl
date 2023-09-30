@@ -186,11 +186,11 @@ do
   end if
   
   if( multiKey( Fb.SC_A ) ) then
-    cameraPos -= normalize( cross( cameraFront, cameraUp ) ) * cameraSpeed
+    cameraPos += normalize( cross( cameraFront, cameraUp ) ) * cameraSpeed
   end if
   
   if( multiKey( Fb.SC_D ) ) then
-    cameraPos += normalize( cross( cameraFront, cameraUp ) ) * cameraSpeed
+    cameraPos -= normalize( cross( cameraFront, cameraUp ) ) * cameraSpeed
   end if
   
   sleep( 1, 1 )
