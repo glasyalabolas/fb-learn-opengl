@@ -55,11 +55,9 @@ var shader = GLShader( "shaders/01-colors.vs", "shaders/01-colors.fs" )
 var lightingShader = GLShader( "shaders/01-light-cube.vs", "shaders/01-light-cube.fs" )
 
 '' Don't forget to activate the shader before setting uniforms 
-with shader
-  .use()
-  .setInt( "texture1", 0 )
-  .setInt( "texture2", 1 )
-end with
+glUseProgram( shader )
+  shader.setInt( "texture1", 0 )
+  shader.setInt( "texture2", 1 )
 
 dim as double deltaTime = 0.0, lastFrame = 0.0
 
@@ -80,14 +78,12 @@ do
   glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT )
   
   '' Bind shader
-  with shader
-    .use()
+  shader.use()
   
-    .setMat4( "projection", fbm.projection( cam.fov, scrW / scrH, cam.near, cam.far ) )
-    .setMat4( "view", cam.getViewMatrix() )
-    .setVec4( "objectColor", 1.0f, 0.5f, 0.31f )
-    .setVec4( "lightColor",  1.0f, 1.0f, 1.0f )  
-  end with
+  shader.setMat4( "projection", fbm.projection( cam.fov, scrW / scrH, cam.near, cam.far ) )
+  shader.setMat4( "view", cam.getViewMatrix() )
+  shader.setVec4( "objectColor", 1.0f, 0.5f, 0.31f )
+  shader.setVec4( "lightColor",  1.0f, 1.0f, 1.0f )  
   
   '' Bind each texture to a texture unit
   glActiveTexture( GL_TEXTURE0 )
@@ -107,12 +103,10 @@ do
   glBindVertexArray( 0 )
   
   '' Render light source
-  with lightingShader
-    .use()
+  lightingShader.use()
   
-    .setMat4( "projection", fbm.projection( cam.fov, scrW / scrH, cam.near, cam.far ) )
-    .setMat4( "view", cam.getViewMatrix() )
-  end with
+  shader.setMat4( "projection", fbm.projection( cam.fov, scrW / scrH, cam.near, cam.far ) )
+  shader.setMat4( "view", cam.getViewMatrix() )
   
   glBindVertexArray( light )
     shader.setMat4( "model", fbm.translation( lightPos ) * _
