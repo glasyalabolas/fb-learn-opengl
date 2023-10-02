@@ -112,12 +112,10 @@ do
   
     .setMat4( "projection", fbm.projection( cam.fov, scrW / scrH, cam.near, cam.far ) )
     .setMat4( "view", cam.getViewMatrix() )
+    .setMat4( "model", fbm.translation( lightPos ) * fbm.scaling( 0.2f, 0.2f, 0.2f ) )
   end with
   
   glBindVertexArray( light )
-    shader.setMat4( "model", fbm.translation( lightPos ) * _
-      fbm.scaling( 0.2f, 0.2f, 0.2f ) )
-    
     glDrawArrays( GL_TRIANGLES, 0, 36 )
   glBindVertexArray( 0 )
   
