@@ -14,7 +14,7 @@ sub initGL( w as long, h as long )
   glEnable( GL_DEPTH_TEST )
 end sub
 
-windowTitle( "learnopengl.com - Colors" )
+windowTitle( "learnopengl.com - Ambient" )
 const as long scrW = 800, scrH = 600
 
 '' Set the OpenGL context
@@ -42,12 +42,12 @@ glBindProc( glActiveTexture )
 var model = solidCube()
 var light = solidCube()
 
-dim as vec4 cubePositions( ... ) = { _
-  vec4(  0.0f,  0.0f,  0.0f ) _
+dim as Vec4 cubePositions( ... ) = { _
+  Vec4(  0.0f,  0.0f,  0.0f ) _
 }
 
 '' Load and compile shaders
-var shader = GLShader( "shaders/01-colors.vs", "shaders/01-colors.fs" )
+var shader = GLShader( "shaders/02-basic-lighting-ambient.vs", "shaders/02-basic-lighting-ambient.fs" )
 var lightingShader = GLShader( "shaders/01-light-cube.vs", "shaders/01-light-cube.fs" )
 
 dim as double deltaTime = 0.0, lastFrame = 0.0

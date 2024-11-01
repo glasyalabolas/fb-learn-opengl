@@ -14,7 +14,7 @@ sub initGL( w as long, h as long )
   glEnable( GL_DEPTH_TEST )
 end sub
 
-windowTitle( "learnopengl.com - Colors" )
+windowTitle( "learnopengl.com - Lighting maps - Specular" )
 const as long scrW = 800, scrH = 600
 
 '' Set the OpenGL context
@@ -39,16 +39,20 @@ glBindProc( glActiveTexture )
 #include once "../inc/fbgl-texture.bi"
 #include once "../inc/fbgl-models.bi"
 
-var model = solidCube()
+var model = texturedCube()
 var light = solidCube()
 
-dim as vec4 cubePositions( ... ) = { _
-  vec4(  0.0f,  0.0f,  0.0f ) _
+dim as Vec4 cubePositions( ... ) = { _
+  Vec4(  0.0f,  0.0f,  0.0f ) _
 }
 
 '' Load and compile shaders
-var shader = GLShader( "shaders/01-colors.vs", "shaders/01-colors.fs" )
-var lightingShader = GLShader( "shaders/01-light-cube.vs", "shaders/01-light-cube.fs" )
+var shader = GLShader( "shaders/04-lighting-maps-diffuse.vs", "shaders/04-lighting-maps-specular.fs" )
+var lightShader = GLShader( "shaders/01-light-cube.vs", "shaders/01-light-cube.fs" )
+
+'' Load textures
+var diffuseMap = GLTexture( "../res/container2.bmp" )
+var specularMap = GLTexture( "../res/container2_specular.bmp" )
 
 dim as double deltaTime = 0.0, lastFrame = 0.0
 
@@ -68,17 +72,38 @@ do
   glClearColor( 0.2f, 0.3f, 0.3f, 1.0f )
   glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT )
   
+  var lightColor = vec3( 1.0f, 1.0f, 1.0f )
+  var diffuseColor = lightColor * 0.5f
+  var ambientColor = diffuseColor * 0.2f
+  
   '' Bind shader
   with shader
     .use()
-  
+    
     .setMat4( "projection", fbm.projection( cam.fov, scrW / scrH, cam.near, cam.far ) )
     .setMat4( "view", cam.getViewMatrix() )
-    .setVec3( "objectColor", 1.0f, 0.5f, 0.31f )
-    .setVec3( "lightColor",  1.0f, 1.0f, 1.0f )  
+    .setVec3( "viewPos", cam.pos.x, cam.pos.y, cam.pos.z )
+    
+    '' Set material properties for the cube
+    .setInt( "material.diffuse", 0 )
+    glActiveTexture( GL_TEXTURE0 )
+    glBindTexture( GL_TEXTURE_2D, diffuseMap )
+    
+    .setInt( "material.specular", 1 )
+    glActiveTexture( GL_TEXTURE1 )
+    glBindTexture( GL_TEXTURE_2D, specularMap )
+    
+    .setVec3(  "material.specular",  0.5f, 0.5f, 0.5f )
+    .setFloat( "material.shininess", 32.0f )
+    
+    '' Set light properties
+    .setVec3( "light.position", lightPos.x, lightPos.y, lightPos.z )
+    .setVec3( "light.ambient",  ambientColor )
+    .setVec3( "light.diffuse",  diffuseColor )
+    .setVec3( "light.specular", 1.0f, 1.0f, 1.0f ) 
   end with
   
-  '' Bind vertex array and render it
+  '' Render cube
   glBindVertexArray( model )
     for i as integer = 0 to ubound( cubePositions )
       '' Set the transform for the model before rendering it
@@ -90,7 +115,7 @@ do
   glBindVertexArray( 0 )
   
   '' Render light source
-  with lightingShader
+  with lightShader
     .use()
   
     .setMat4( "projection", fbm.projection( cam.fov, scrW / scrH, cam.near, cam.far ) )

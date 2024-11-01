@@ -26,16 +26,7 @@ sub errorExit( msg as string )
     screen( 0 )
   end if
   
-  dim as integer w, h
-  screenInfo( w, h )
-  
-  w *= 0.75
-  h *= 0.75
-  
-  screenRes( w, h )
-  width w / 8, h / 16
-  
-  ? "GL Error: " & msg
+  debug( "GL Error: " & msg )
   
   sleep()
   

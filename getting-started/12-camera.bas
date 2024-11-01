@@ -41,6 +41,7 @@ dim as GLuint texture1 = createGLTexture( loadBMP( "../res/container.bmp" ) )
 dim as GLuint texture2 = createGLTexture( loadBMP( "../res/awesomeface.bmp" ) )
 
 dim as GLfloat vertices( ... ) = { _
+_ '' Positions          Texture coords
   -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, _
    0.5f, -0.5f, -0.5f,  1.0f, 0.0f, _
    0.5f,  0.5f, -0.5f,  1.0f, 1.0f, _

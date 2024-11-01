@@ -1,6 +1,8 @@
 #include once "GL/gl.bi"
 #include once "GL/glext.bi"
 #include once "fbglext.bi"
+#include once "../inc/vec3.bi"
+#include once "../inc/vec4.bi"
 #include once "../inc/mat4.bi"
 
 /'
@@ -25,6 +27,7 @@ glBindProc( glUseProgram )
 glBindProc( glGetUniformLocation )
 glBindProc( glUniform1i )
 glBindProc( glUniform1f )
+glBindProc( glUniform3f )
 glBindProc( glUniform4f )
 glBindProc( glUniformMatrix4fv )
 
@@ -155,7 +158,7 @@ end function
 /'
   This type holds the bare minimum required for OpenGL to actually draw something on screen: a
   vertex shader, and a fragment (pixel) shader. There are other types of shaders such as geometry and
-  tesellation control, but they're useful for 3D stuff mostly.
+  tesellation control.
   
   The constructor takes two string parameters: the file names of the shaders to be loaded, compiled
   and linked via the auxiliary functions that we defined before.
@@ -174,8 +177,11 @@ type GLShader
     '' Uniform utility functions
     declare sub setInt( name_ as string, value as GLint )
     declare sub setFloat( name_ as string, value as GLfloat )
+    declare sub setVec3( name_ as string, x as GLfloat, y as GLfloat, z as GLfloat )
+    declare sub setVec3( name_ as string, v as vec3 )
     declare sub setVec4( name_ as string, x as GLfloat, y as GLfloat, z as GLfloat, w as GLfloat = 1.0f )
-    declare sub setMat4( name_ as string, M as Mat4, transposed as boolean = true )
+    declare sub setVec4( name_ as string, v as vec4 )
+    declare sub setMat4( name_ as string, M as mat4, transposed as boolean = true )
   
   private:
     as GLuint _shaderID
@@ -255,11 +261,23 @@ sub GLShader.setFloat( name_ as string, value as GLfloat )
   glUniform1f( glGetUniformLocation( _shaderID, name_ ), value )
 end sub
 
+sub GLShader.setVec3( name_ as string, x as GLfloat, y as GLfloat, z as GLfloat )
+  glUniform3f( glGetUniformLocation( _shaderID, name_ ), x, y, z )
+end sub
+
+sub GLShader.setVec3( name_ as string, v as vec3 )
+  glUniform3f( glGetUniformLocation( _shaderID, name_ ), v.x, v.y, v.z )
+end sub
+
 sub GLShader.setVec4( name_ as string, x as GLfloat, y as GLfloat, z as GLfloat, w as GLfloat = 1.0f )
   glUniform4f( glGetUniformLocation( _shaderID, name_ ), x, y, z, w )
 end sub
 
-sub GLShader.setMat4( name_ as string, M as Mat4, transposed as boolean = true )
+sub GLShader.setVec4( name_ as string, v as vec4 )
+  glUniform4f( glGetUniformLocation( _shaderID, name_ ), v.x, v.y, v.z, v.w )
+end sub
+
+sub GLShader.setMat4( name_ as string, M as mat4, transposed as boolean = true )
   glUniformMatrix4fv( glGetUniformLocation( _shaderID, name_ ), 1, iif( transposed, GL_TRUE, GL_FALSE ), @M.a )
 end sub
 

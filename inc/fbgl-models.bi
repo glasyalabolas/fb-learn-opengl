@@ -3,6 +3,8 @@
 #define _B( c ) ( culng( c )        and 255 )
 #define _A( c ) ( culng( c ) shr 24         )
 
+#define ARRAY_ELEMENTS( a ) ( ubound( a ) + 1 )
+
 type Mesh
   declare constructor()
   declare constructor( as GLuint, as GLuint )
@@ -33,76 +35,7 @@ sub Mesh.dispose()
   glDeleteBuffers( 1, @_VBO )
 end sub
 
-function cube() as Mesh
-  dim as GLfloat vertices( ... ) = { _
-  _ '' Positions          Texture coords
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, _
-     0.5f, -0.5f, -0.5f,  1.0f, 0.0f, _
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f, _
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f, _
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, _
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, _
-    _
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, _
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f, _
-     0.5f,  0.5f,  0.5f,  1.0f, 1.0f, _
-     0.5f,  0.5f,  0.5f,  1.0f, 1.0f, _
-    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f, _
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, _
-    _
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f, _
-    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f, _
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, _
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, _
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, _
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f, _
-    _
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f, _
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f, _
-     0.5f, -0.5f, -0.5f,  0.0f, 1.0f, _
-     0.5f, -0.5f, -0.5f,  0.0f, 1.0f, _
-     0.5f, -0.5f,  0.5f,  0.0f, 0.0f, _
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f, _
-    _
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, _
-     0.5f, -0.5f, -0.5f,  1.0f, 1.0f, _
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f, _
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f, _
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, _
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, _
-    _
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, _
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f, _
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f, _
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f, _
-    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f, _
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f _
-  }
-  
-  dim as GLuint VAO, VBO
-  
-  glGenVertexArrays( 1, @VAO )
-  glGenBuffers( 1, @VBO )
-  
-  glBindVertexArray( VAO )
-  glBindBuffer( GL_ARRAY_BUFFER, VBO )
-  
-  glBufferData( GL_ARRAY_BUFFER, ARRAY_ELEMENTS( vertices ) * sizeof( GLfloat ), @vertices( 0 ), GL_STATIC_DRAW )
-  
-  '' Position
-  glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof( GLfloat ), 0 )
-  glEnableVertexAttribArray( 0 )
-  
-  '' Texture coordinates
-  glVertexAttribPointer( 1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof( GLfloat ), cast( any ptr, ( 3 * sizeof( GLfloat ) ) ) )
-  glEnableVertexAttribArray( 1 )
-  
-  glBindVertexArray( 0 )
-  
-  return( Mesh( VAO, VBO ) )
-end function
-
-function lightCube() as Mesh
+function solidCube() as Mesh
   dim as GLfloat vertices( ... ) = { _
   _ '' Positions
     -0.5f, -0.5f, -0.5f, _
@@ -161,6 +94,147 @@ function lightCube() as Mesh
   '' Position
   glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof( GLfloat ), 0 )
   glEnableVertexAttribArray( 0 )
+  
+  return( Mesh( VAO, VBO ) )
+end function
+
+function cube() as Mesh
+  dim as GLfloat vertices( ... ) = { _
+  _ '' Position           Normal
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, _
+     0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, _
+     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, _
+     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, _
+    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, _
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, _
+  _
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, _
+     0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, _
+     0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, _
+     0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, _
+    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, _
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, _
+  _
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, _
+    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, _
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, _
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, _
+    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, _
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, _
+  _
+     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, _
+     0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, _
+     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, _
+     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, _
+     0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, _
+     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, _
+  _
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, _
+     0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, _
+     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, _
+     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, _
+    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, _
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, _
+  _
+    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, _
+     0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, _
+     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, _
+     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, _
+    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, _
+    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f _
+  }  
+  dim as GLuint VAO, VBO
+  
+  glGenVertexArrays( 1, @VAO )
+  glGenBuffers( 1, @VBO )
+  
+  glBindVertexArray( VAO )
+  glBindBuffer( GL_ARRAY_BUFFER, VBO )
+  
+  glBufferData( GL_ARRAY_BUFFER, ARRAY_ELEMENTS( vertices ) * sizeof( GLfloat ), @vertices( 0 ), GL_STATIC_DRAW )
+  
+  '' Position
+  glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof( GLfloat ), 0 )
+  glEnableVertexAttribArray( 0 )
+  
+  '' Normal
+  glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof( GLfloat ), cast( any ptr, ( 3 * sizeof( GLfloat ) ) ) )
+  glEnableVertexAttribArray( 1 )
+  
+  glBindVertexArray( 0 )
+  
+  return( Mesh( VAO, VBO ) )
+end function
+
+function texturedCube() as Mesh
+  dim as GLfloat vertices( ... ) = { _
+  _ '' Positions          Normals              Texture coords
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f, _
+     0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f, _
+     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f, _
+     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f, _
+    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f, _
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f, _
+  _
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f, _
+     0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f, _
+     0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f, _
+     0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f, _
+    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f, _
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f, _
+  _
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f, _
+    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f, _
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f, _
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f, _
+    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f, _
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f, _
+  _
+     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f, _
+     0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f, _
+     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f, _
+     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f, _
+     0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f, _
+     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f, _
+  _
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f, _
+     0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f, _
+     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f, _
+     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f, _
+    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f, _
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f, _
+  _
+    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f, _
+     0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f, _
+     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f, _
+     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f, _
+    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f, _
+    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f _
+  }
+  
+  dim as GLuint VAO, VBO
+  
+  glGenVertexArrays( 1, @VAO )
+  glGenBuffers( 1, @VBO )
+  
+  glBindVertexArray( VAO )
+  glBindBuffer( GL_ARRAY_BUFFER, VBO )
+  
+  glBufferData( GL_ARRAY_BUFFER, ARRAY_ELEMENTS( vertices ) * sizeof( GLfloat ), @vertices( 0 ), GL_STATIC_DRAW )
+  
+  '' Position
+  glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof( GLfloat ), 0 )
+  glEnableVertexAttribArray( 0 )
+  
+  '' Normal
+  glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof( GLfloat ), cast( any ptr, ( 3 * sizeof( GLfloat ) ) ) )
+  glEnableVertexAttribArray( 1 )
+  
+  '' Texture coords
+  glVertexAttribPointer( 2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof( GLfloat ), cast( any ptr, ( 6 * sizeof( GLfloat ) ) ) )
+  glEnableVertexAttribArray( 2 )
+  
+  glBindVertexArray( 0 )
   
   return( Mesh( VAO, VBO ) )
 end function

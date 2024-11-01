@@ -35,7 +35,7 @@ glBindProc( glUseProgram )
 var shader = GLShader( "shaders/vertex-attributes.vs", "shaders/vertex-attributes.fs" )
 
 dim as GLfloat vertices( ... ) = { _
-  _ '' positions       '' colors
+  _ '' Positions       Colors
    0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, _  '' bottom right
   -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f, _  '' bottom left
    0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f }   '' top

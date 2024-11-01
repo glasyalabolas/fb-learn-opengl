@@ -67,15 +67,15 @@ imageDestroy( img )
 var shader = GLShader( "shaders/texture.vs", "shaders/texture.fs" )
 
 dim as GLfloat vertices( ... ) = { _
-  _ '' positions        '' colors           '' texture coords
+  _ '' Positions        Colors              Texture coords
    0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, _  '' top right
    0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, _  '' bottom right
   -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, _  '' bottom left
   -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f }   '' top left
 
 dim as GLuint indices( ... ) = { _
-  0, 1, 3, _   '' first triangle
-  1, 2, 3 }    '' second triangle  
+  0, 1, 3, _   '' First triangle
+  1, 2, 3 }    '' Second triangle  
 
 '' Vertex array object
 dim as GLuint VAO
