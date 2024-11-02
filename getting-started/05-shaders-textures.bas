@@ -41,10 +41,8 @@ glGenTextures( 1, @texture )
 '' Bind the newly created texture
 glBindTexture( GL_TEXTURE_2D, texture )
 
-/'
-  These calls set the format of the bitmap that GL uses so we can use the Fb.Image
-  buffers directly and upload them to the shader	
-'/
+'' These calls set the format of the bitmap that GL uses so we can use the Fb.Image
+'' buffers directly and upload them to the shader
 glPixelStorei( GL_UNPACK_ALIGNMENT, 4 )
 glPixelStorei( GL_UNPACK_ROW_LENGTH, img->pitch \ sizeof( GLuint ) )
 
@@ -90,7 +88,7 @@ dim as GLuint EBO
 glGenBuffers( 1, @EBO )
 
 '' Bind the vertex array. All subsequent attributes we define here will be bound to
-'' the array, so we can just use the vertex array object instead of havint to bind
+'' the array, so we can just use the vertex array object instead of having to bind
 '' everything again.
 glBindVertexArray( VAO )
 

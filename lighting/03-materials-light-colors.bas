@@ -42,8 +42,8 @@ glBindProc( glActiveTexture )
 var model = cube()
 var light = solidCube()
 
-dim as Vec4 cubePositions( ... ) = { _
-  Vec4(  0.0f,  0.0f,  0.0f ) _
+dim as vec4 cubePositions( ... ) = { _
+  vec4(  0.0f,  0.0f,  0.0f ) _
 }
 
 '' Load and compile shaders
@@ -53,8 +53,8 @@ var lightShader = GLShader( "shaders/01-light-cube.vs", "shaders/01-light-cube.f
 dim as double deltaTime = 0.0, lastFrame = 0.0
 
 '' Camera
-var cam = Camera( Vec4( 0.0f, 0.0f, 3.0f ) )
-var lightPos = Vec4( 1.2f, 1.0f, 2.0f )
+var cam = Camera( vec4( 0.0f, 0.0f, 3.0f ) )
+var lightPos = vec4( 1.2f, 1.0f, 2.0f )
 
 '' Mouse status and last position/wheel
 dim as long xpos, ypos, buttons, wheel, lastWheel = 0
@@ -79,14 +79,14 @@ do
     
     .setMat4( "projection", fbm.projection( cam.fov, scrW / scrH, cam.near, cam.far ) )
     .setMat4( "view", cam.getViewMatrix() )
-    .setVec3( "viewPos", cam.pos.x, cam.pos.y, cam.pos.z )
+    .setVec3( "viewPos", cam.pos )
     '' Set material properties for the cube
     .setVec3(  "material.ambient",   1.0f, 0.5f, 0.31f )
     .setVec3(  "material.diffuse",   1.0f, 0.5f, 0.31f )
     .setVec3(  "material.specular",  0.5f, 0.5f, 0.5f )
     .setFloat( "material.shininess", 32.0f )
     '' Set light properties
-    .setVec3( "light.position", lightPos.x, lightPos.y, lightPos.z )
+    .setVec3( "light.position", lightPos )
     .setVec3( "light.ambient",  ambientColor )
     .setVec3( "light.diffuse",  diffuseColor )
     .setVec3( "light.specular", 1.0f, 1.0f, 1.0f ) 
@@ -97,7 +97,7 @@ do
     for i as integer = 0 to ubound( cubePositions )
       '' Set the transform for the model before rendering it
       shader.setMat4( "model", fbm.translation( cubePositions( i ) ) * _
-        fbm.rotation( radians( 20.0f * i ), Vec4( 1.0f, 0.3f, 0.5f ) ) )
+        fbm.rotation( radians( 20.0f * i ), vec4( 1.0f, 0.3f, 0.5f ) ) )
       
       glDrawArrays( GL_TRIANGLES, 0, 36 )
     next
@@ -148,11 +148,11 @@ do
   end if
   
   if( multiKey( Fb.SC_SPACE ) ) then
-    cam.lookAt( Vec4( 0.0f, 0.0f, 0.0f ) )
+    cam.lookAt( vec4( 0.0f, 0.0f, 0.0f ) )
   end if
   
   if( getMouse( xpos, ypos, wheel, buttons ) = 0 ) then
-    dim as single sensitivity = 0.8f
+    dim as single sensitivity = 0.2f
     dim as single xoffset = ( xpos - lastX ) * sensitivity
     dim as single yoffset = ( lastY - ypos ) * sensitivity
     
@@ -161,7 +161,7 @@ do
     
     if( buttons and Fb.BUTTON_LEFT ) then
       '' Rotation about the Y axis of the WORLD (aka Yaw)
-      cam.rotate( Vec4( 0.0, 1.0, 0.0 ), 320.0 * xoffset / ( scrW / 2 ) * deltaTime )
+      cam.rotate( vec4( 0.0, 1.0, 0.0 ), 320.0 * xoffset / ( scrW / 2 ) * deltaTime )
       '' Rotation about the X axis of the CAMERA (aka Pitch)
       cam.rotate( cam.X, 320.0 * yoffset / ( scrH / 2 ) * deltaTime )
     end if

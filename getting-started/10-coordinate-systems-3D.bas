@@ -96,7 +96,7 @@ dim as GLuint VBO
 glGenBuffers( 1, @VBO )
 
 '' Bind the vertex array. All subsequent attributes we define here will be bound to
-'' the array, so we can just use the vertex array object instead of havint to bind
+'' the array, so we can just use the vertex array object instead of having to bind
 '' everything again.
 glBindVertexArray( VAO )
 
@@ -123,28 +123,26 @@ glUseProgram( shader )
   shader.setInt( "texture1", 0 )
   shader.setInt( "texture2", 1 )
 
+'' Pass the view and projection matrices to the shader
 var view_ = fbm.translation( 0.0f, 0.0f, -3.0f )
 var projection = fbm.projection( 45.0f, scrW / scrH, 0.1f, 100.0f )
 
-'' Remember, we always pass the matrices transposed to GL
-dim as GLint viewLoc = glGetUniformLocation( shader, "view" )
-glUniformMatrix4fv( viewLoc, 1, GL_TRUE, @view_.a )
-
-dim as GLint projectionLoc = glGetUniformLocation( shader, "projection" )
-glUniformMatrix4fv( projectionLoc, 1, GL_TRUE, @projection.a )
+shader.setMat4( "view", view_ )
+shader.setMat4( "projection", projection )
 
 do
   '' Clear the color buffer
   glClearColor( 0.2f, 0.3f, 0.3f, 1.0f )
   glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT )
   
+  '' Transform the model
   var model = fbm.rotation( timer() * radians( 50.0f ), Vec4( 0.5f, 1.0f, 0.0f ) )
-  
-  dim as GLint modelLoc = glGetUniformLocation( shader, "model" )
-  glUniformMatrix4fv( modelLoc, 1, GL_TRUE, @model.a )
   
   '' Bind shader
   glUseProgram( shader )
+  
+  '' Update the model matrix in the shader
+  shader.setMat4( "model", model )
   
   '' Bind each texture to a texture unit
   glActiveTexture( GL_TEXTURE0 )

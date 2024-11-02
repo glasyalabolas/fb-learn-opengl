@@ -233,7 +233,7 @@ end function
   first translate the object to the axis, then use this function, then translate back
   in the new direction.
 '/
-function rotateAroundAxis( v as Vec4, axis as Vec4, angle as single ) as Vec4
+function rotateAroundAxis overload( v as Vec4, axis as Vec4, angle as single ) as Vec4
   if( ( v.x = 0 ) andAlso ( v.y = 0 ) andAlso ( v.z = 0 ) ) then
     return Vec4( 0.0, 0.0, 0.0 )
   end if

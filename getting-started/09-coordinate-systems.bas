@@ -68,7 +68,7 @@ dim as GLuint EBO
 glGenBuffers( 1, @EBO )
 
 '' Bind the vertex array. All subsequent attributes we define here will be bound to
-'' the array, so we can just use the vertex array object instead of havint to bind
+'' the array, so we can just use the vertex array object instead of having to bind
 '' everything again.
 glBindVertexArray( VAO )
 
@@ -99,19 +99,9 @@ var model = fbm.rotation( radians( -55.0f ), vec4( 1.0f, 0.0f, 0.0f ) )
 var view_ = fbm.translation( 0.0f, 0.0f, -3.0f )
 var projection = fbm.projection( 45.0f, scrW / scrH, 0.1f, 100.0f )
 
-'' Remember, we always pass the matrices transposed to GL
 shader.setMat4( "model", model )
 shader.setMat4( "view", view_ )
 shader.setMat4( "projection", projection )
-
-'dim as GLint modelLoc = glGetUniformLocation( shader, "model" )
-'glUniformMatrix4fv( modelLoc, 1, GL_TRUE, @model.a )
-'
-'dim as GLint viewLoc = glGetUniformLocation( shader, "view" )
-'glUniformMatrix4fv( viewLoc, 1, GL_TRUE, @view_.a )
-'
-'dim as GLint projectionLoc = glGetUniformLocation( shader, "projection" )
-'glUniformMatrix4fv( projectionLoc, 1, GL_TRUE, @projection.a )
 
 do
   '' Clear the color buffer

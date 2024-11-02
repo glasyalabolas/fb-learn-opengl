@@ -85,17 +85,17 @@ _ '' Positions          Texture coords
   -0.5f,  0.5f, -0.5f,  0.0f, 1.0f _
 }
 
-dim as Vec4 cubePositions( ... ) = { _
-  Vec4(  0.0f,  0.0f,  0.0f ), _
-  Vec4(  2.0f,  5.0f, -15.0f ), _
-  Vec4( -1.5f, -2.2f, -2.5f ), _
-  Vec4( -3.8f, -2.0f, -12.3f ), _
-  Vec4(  2.4f, -0.4f, -3.5f ), _
-  Vec4( -1.7f,  3.0f, -7.5f ), _
-  Vec4(  1.3f, -2.0f, -2.5f ), _
-  Vec4(  1.5f,  2.0f, -2.5f ), _
-  Vec4(  1.5f,  0.2f, -1.5f ), _
-  Vec4( -1.3f,  1.0f, -1.5f ) }
+dim as vec4 cubePositions( ... ) = { _
+  vec4(  0.0f,  0.0f,  0.0f ), _
+  vec4(  2.0f,  5.0f, -15.0f ), _
+  vec4( -1.5f, -2.2f, -2.5f ), _
+  vec4( -3.8f, -2.0f, -12.3f ), _
+  vec4(  2.4f, -0.4f, -3.5f ), _
+  vec4( -1.7f,  3.0f, -7.5f ), _
+  vec4(  1.3f, -2.0f, -2.5f ), _
+  vec4(  1.5f,  2.0f, -2.5f ), _
+  vec4(  1.5f,  0.2f, -1.5f ), _
+  vec4( -1.3f,  1.0f, -1.5f ) }
 
 '' Vertex array object
 dim as GLuint VAO
@@ -106,7 +106,7 @@ dim as GLuint VBO
 glGenBuffers( 1, @VBO )
 
 '' Bind the vertex array. All subsequent attributes we define here will be bound to
-'' the array, so we can just use the vertex array object instead of havint to bind
+'' the array, so we can just use the vertex array object instead of having to bind
 '' everything again.
 glBindVertexArray( VAO )
 
@@ -136,9 +136,9 @@ glUseProgram( shader )
 dim as double deltaTime = 0.0, lastFrame = 0.0
 
 '' Camera vectors
-var cameraPos = Vec4( 0.0f, 0.0f, 3.0f )
-var cameraFront = Vec4( 0.0f, 0.0f, -1.0f )
-var cameraUp = Vec4( 0.0f, 1.0f, 0.0f )
+var cameraPos = vec4( 0.0f, 0.0f, 3.0f )
+var cameraFront = vec4( 0.0f, 0.0f, -1.0f )
+var cameraUp = vec4( 0.0f, 1.0f, 0.0f )
 
 '' Mouse status and last position
 dim as long xpos, ypos, wheel, lastWheel = 0
@@ -171,7 +171,7 @@ do
     for i as integer = 0 to ubound( cubePositions )
       '' Set the transform for the model before rendering it
       shader.setMat4( "model", fbm.translation( cubePositions( i ) ) * _
-        fbm.rotation( radians( 20.0f * i ), Vec4( 1.0f, 0.3f, 0.5f ) ) )
+        fbm.rotation( radians( 20.0f * i ), vec4( 1.0f, 0.3f, 0.5f ) ) )
       
       glDrawArrays( GL_TRIANGLES, 0, 36 )
     next
@@ -226,7 +226,7 @@ do
   end if
   
   '' Set up new camera direction based on angles
-  var direction = Vec4( _
+  var direction = vec4( _
     cos( radians( yaw ) ) * cos( radians( pitch ) ), _
     sin( radians( pitch ) ), _
     sin( radians( yaw ) ) * cos( radians( pitch ) ) )

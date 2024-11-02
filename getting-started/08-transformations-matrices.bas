@@ -68,7 +68,7 @@ dim as GLuint EBO
 glGenBuffers( 1, @EBO )
 
 '' Bind the vertex array. All subsequent attributes we define here will be bound to
-'' the array, so we can just use the vertex array object instead of havint to bind
+'' the array, so we can just use the vertex array object instead of having to bind
 '' everything again.
 glBindVertexArray( VAO )
 

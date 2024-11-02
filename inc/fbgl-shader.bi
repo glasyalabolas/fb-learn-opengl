@@ -179,6 +179,7 @@ type GLShader
     declare sub setFloat( name_ as string, value as GLfloat )
     declare sub setVec3( name_ as string, x as GLfloat, y as GLfloat, z as GLfloat )
     declare sub setVec3( name_ as string, v as vec3 )
+    declare sub setVec3( name_ as string, v as vec4 )
     declare sub setVec4( name_ as string, x as GLfloat, y as GLfloat, z as GLfloat, w as GLfloat = 1.0f )
     declare sub setVec4( name_ as string, v as vec4 )
     declare sub setMat4( name_ as string, M as mat4, transposed as boolean = true )
@@ -266,6 +267,10 @@ sub GLShader.setVec3( name_ as string, x as GLfloat, y as GLfloat, z as GLfloat 
 end sub
 
 sub GLShader.setVec3( name_ as string, v as vec3 )
+  glUniform3f( glGetUniformLocation( _shaderID, name_ ), v.x, v.y, v.z )
+end sub
+
+sub GLShader.setVec3( name_ as string, v as vec4 )
   glUniform3f( glGetUniformLocation( _shaderID, name_ ), v.x, v.y, v.z )
 end sub
 

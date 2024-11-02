@@ -83,9 +83,9 @@ do
     glDrawArrays( GL_TRIANGLES, 0, 3 )
   glBindVertexArray( 0 )
   
-  flip()
-  
   sleep( 1, 1 )
+  
+  flip()
 loop until( len( inkey() ) )
 
 '' Cleanup
